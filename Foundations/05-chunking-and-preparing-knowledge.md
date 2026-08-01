@@ -12,7 +12,7 @@
 - [Engineer Perspective](#engineer-perspective)
 - [Architecture Update](#architecture-update)
 
-## Architect's Rule #1: A great embedding model cannot compensate for poor chunking.
+**Architect's Rule #1: A great embedding model cannot compensate for poor chunking.**
 
 I've seen production systems where teams spent weeks comparing embedding models, only to discover that the real issue was their chunking strategy.
 
@@ -152,6 +152,7 @@ Instead of counting tokens, split by meaning.
 
 For example:
 
+```text
 Chapter
 
 ↓
@@ -161,6 +162,7 @@ Section
 ↓
 
 Subsection
+```
 
 Or:
 
@@ -240,7 +242,7 @@ Chunk
 Embedding
 
 We also store metadata.
-
+```text
 Example:
 
 {
@@ -250,7 +252,7 @@ Example:
   "version": "2026.2",
   "updated": "2026-06-01"
 }
-
+```
 This becomes incredibly useful later for:
 
 citations,
@@ -321,12 +323,12 @@ Its text-splitter components are designed to make large documents individually r
 Example:
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-
+```text
 splitter = RecursiveCharacterTextSplitter(
     chunk_size=500,
     chunk_overlap=75
 )
-
+```
 chunks = splitter.split_text(document_text)
 
 This applies a strategy you configure; it does not prove that 500/75 is optimal.
@@ -345,7 +347,7 @@ code-aware parsing.
 A semantic splitter typically embeds smaller units such as sentences and creates a boundary when adjacent sections become semantically dissimilar.
 
 Conceptually:
-
+```text
 Sentence 1 ─ similar ┐
 Sentence 2 ─ similar ├─ Chunk A
 Sentence 3 ─ similar ┘
@@ -355,7 +357,7 @@ Large semantic change
 
 Sentence 4 ─ similar ┐
 Sentence 5 ─ similar ┘ Chunk B
-
+```
 This can discover topic transitions, but it costs more than simple structural splitting and is not automatically superior for every domain.
 
 Unstructured
@@ -391,7 +393,7 @@ heading + related paragraphs + table
 Azure AI Search integrated chunking
 
 Azure AI Search supports built-in indexing pipelines that can:
-
+```text
 Read documents
     ↓
 Split content
@@ -399,7 +401,7 @@ Split content
 Generate embeddings
     ↓
 Populate the search index
-
+```
 Its built-in indexers and skillsets can automate both chunking and vectorization.
 
 This is convenient for Azure-native systems, but you still configure choices such as:
@@ -551,13 +553,13 @@ Final mental model
 Chunking library
 → Implements splitting techniques
 
-Document parser
+**Document parser**
 → Discovers structure and content types
 
-Evaluation framework
+**Evaluation framework**
 → Determines which strategy works best
 
-Architect
+**Architect**
 → Chooses the acceptable quality/cost trade-off
 
 So yes, tools can automate much of the work—but today, the “best chunking strategy” is generally measured, not magically inferred.
