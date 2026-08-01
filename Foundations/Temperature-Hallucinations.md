@@ -1,0 +1,316 @@
+# Where does Temperature fit?
+
+Let's revisit our pipeline.
+
+User Question
+      │
+      ▼
+Retrieval
+      │
+      ▼
+Reranker
+      │
+      ▼
+Prompt Builder
+      │
+      ▼
+LLM
+      │
+      ▼
+Answer
+
+Everything we've studied so far happens before the LLM.
+
+Temperature comes into play inside the LLM while it is generating the next token.
+
+First, how does an LLM generate text?
+
+Remember our very first chapter.
+
+An LLM predicts:
+
+"What is the most likely next token?"
+
+Suppose the prompt is:
+
+The capital of France is
+
+Internally, the model might assign probabilities like:
+
+Next Token	Probability
+Paris	0.92
+Lyon	0.03
+London	0.01
+Berlin	0.01
+Apple	0.000001
+
+Without any randomness, it would always pick:
+
+Paris
+So what is Temperature?
+
+Temperature controls how much randomness is introduced when choosing the next token.
+
+Think of it as:
+
+How adventurous should the model be?
+
+Not:
+
+How intelligent should the model be?
+
+This is a very common misconception.
+
+Temperature = 0
+
+At temperature 0, the model behaves almost deterministically.
+
+Given:
+
+Token	Probability
+Paris	92%
+Lyon	3%
+London	1%
+
+It will almost always pick:
+
+Paris
+
+Every run produces nearly the same answer.
+
+Temperature = 1
+
+Now imagine we increase the temperature.
+
+The probabilities become "flatter."
+
+Conceptually:
+
+Token	Original	After Higher Temperature
+Paris	92%	65%
+Lyon	3%	15%
+London	1%	10%
+Berlin	1%	8%
+
+Now the model is willing to occasionally choose a less likely—but still plausible—token.
+
+Notice something important:
+
+It is not inventing new knowledge.
+
+It is simply sampling from the probability distribution with more randomness.
+
+A Dice Analogy
+
+Imagine a loaded die.
+
+Normally:
+
+6
+
+comes up almost every time.
+
+Increasing temperature doesn't change the numbers on the die.
+
+It makes the die less loaded, giving other faces a better chance.
+
+The underlying knowledge stays the same.
+
+Only the sampling changes.
+
+Example: Creative Writing
+
+Prompt:
+
+Write a story about a dragon.
+Temperature = 0
+A dragon lived in a mountain.
+It guarded treasure.
+A knight arrived...
+
+Very predictable.
+
+Temperature = 1
+The dragon collected broken musical instruments
+because it believed every forgotten melody
+contained a memory of the stars...
+
+Much more creative.
+
+Example: Code Generation
+
+Prompt:
+
+Reverse a linked list in Python.
+
+Temperature = 0:
+
+You'll almost always get the standard, idiomatic solution.
+
+Temperature = 1:
+
+The model may produce:
+
+recursive solution,
+iterative solution,
+helper functions,
+different variable names,
+slightly different organization.
+
+Not necessarily wrong.
+
+Just more varied.
+
+Example: Enterprise AI
+
+Imagine your internal engineering assistant.
+
+Question:
+
+How do I publish a Windows driver?
+
+Would you want creativity?
+
+Absolutely not.
+
+You want:
+
+deterministic,
+repeatable,
+policy-compliant,
+grounded answers.
+
+Typical setting:
+
+Temperature = 0
+
+Now imagine:
+
+Generate five marketing slogans.
+
+Now creativity is desirable.
+
+Temperature:
+
+0.8–1.2
+
+(depending on the model and API).
+
+A Common Misconception
+
+People often think:
+
+Higher Temperature
+
+↓
+
+Smarter AI
+
+False.
+
+Or:
+
+Lower Temperature
+
+↓
+
+More Accurate Knowledge
+
+Also not exactly.
+
+Temperature changes how the model samples from its existing knowledge.
+
+It does not change what the model knows.
+
+If the model doesn't know something, increasing or decreasing temperature won't teach it.
+
+Temperature and Hallucinations
+
+This is an interesting topic.
+
+Higher temperatures generally increase the chance of surprising or unsupported outputs because the model is more willing to explore lower-probability continuations.
+
+However:
+
+Hallucinations can still occur at temperature 0.
+
+Why?
+
+Because if the model's highest-probability continuation is incorrect, lowering the temperature simply makes it more consistently choose that incorrect continuation.
+
+Hallucinations are primarily reduced by:
+
+good retrieval,
+grounded prompts,
+high-quality models,
+verification,
+tool use,
+
+not by temperature alone.
+
+Typical Temperature Choices
+Use Case	Typical Temperature
+Enterprise RAG	0.0–0.2
+Customer support	0.1–0.3
+Code generation	0.0–0.3
+Technical documentation	0.1–0.3
+Brainstorming	0.7–1.0
+Story writing	0.8–1.2
+Poetry	1.0+ (model-dependent)
+
+Notice that technical systems generally use lower temperatures because consistency is more valuable than novelty.
+
+Architect Perspective
+
+Suppose you're designing three AI systems.
+
+HR Policy Assistant
+Temperature = 0
+
+Reason:
+
+Policies must be consistent.
+
+Coding Copilot
+Temperature = 0.2
+
+Reason:
+
+Allow a little flexibility while staying deterministic.
+
+Marketing Campaign Generator
+Temperature = 0.9
+
+Reason:
+
+Novel ideas are desirable.
+
+Notice how the temperature is chosen based on the business objective, not because one value is universally "better."
+
+One More Advanced Insight
+
+Many people believe:
+
+Temperature
+
+↓
+
+Entire answer changes
+
+That's not quite how it works.
+
+The model generates one token at a time:
+
+Token 1
+
+↓
+
+Token 2
+
+↓
+
+Token 3
+
+If Token 5 changes because of a higher temperature, then the rest of the sentence may evolve differently.
+
+So a small change early in generation can cascade into a significantly different response.

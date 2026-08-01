@@ -1,0 +1,390 @@
+# Tool Executor Architecture
+
+The Tool Executor sits between:
+
+Probabilistic tool proposal
+            │
+            ▼
+Deterministic external execution
+
+Its job is to ensure that an LLM's proposal is converted into a safe, authorized, observable operation.
+
+High-level architecture
+LLM tool request
+       │
+       ▼
+Schema Validator
+       │
+       ▼
+Tool Registry
+       │
+       ▼
+Policy Engine
+       │
+       ▼
+Identity and Authorization
+       │
+       ▼
+Argument Validator
+       │
+       ▼
+Approval Gate
+       │
+       ▼
+Execution Adapter
+       │
+       ▼
+External System
+       │
+       ▼
+Result Normalizer
+       │
+       ▼
+Tool result returned to LLM
+
+## 1. Tool registry
+
+The registry contains the authoritative definition of every available tool:
+
+Tool name
+Description
+Input schema
+Output schema
+Risk level
+Required permissions
+Timeout
+Retry policy
+Caching policy
+Approval requirement
+
+Example:
+
+{
+  "name": "search_symbol",
+  "risk": "read_only",
+  "required_permission": "repository.read",
+  "timeout_seconds": 10,
+  "retry_policy": "transient_only",
+  "cacheable": true
+}
+
+The executor must reject unknown tools, even if the request is valid JSON.
+
+## 2. Schema validation
+
+Validate:
+
+tool name,
+required arguments,
+types,
+enums,
+maximum sizes,
+unexpected fields.
+
+For example:
+
+{
+  "symbol_name": 123
+}
+
+must fail because the symbol should be a string.
+
+## 3. Authentication
+
+The executor determines who initiated the action:
+
+Authenticated user
+Service identity
+Tenant
+Session
+Delegated identity
+
+The LLM does not authenticate users.
+
+Credentials should be obtained from managed identity, a secret store, or delegated authorization—not generated or exposed to the model.
+
+## 4. Authorization
+
+Ask:
+
+Can this user perform this operation
+on this exact resource
+within this tenant?
+
+Examples:
+
+repository.read
+document.extract
+email.send
+deployment.approve
+repository.delete
+
+Authorization must be deterministic and enforced at execution time.
+
+## 5. Tenant isolation
+
+In a multi-tenant system, the executor must enforce tenant scope:
+
+Tenant A request
+        ↓
+Only Tenant A repositories, documents, credentials, and indexes
+
+Do not trust a tenant ID supplied solely by the LLM.
+
+Derive tenant context from the authenticated session.
+
+## 6. Argument sanitization and validation
+
+Validate both technical and business constraints.
+
+Technical:
+
+valid identifiers,
+allowed file types,
+maximum query length,
+supported API methods,
+path traversal protection.
+
+Business:
+
+date range allowed,
+repository exists,
+company belongs to current task,
+amount is within limits.
+
+For SQL, accept structured filters rather than arbitrary raw queries:
+
+{
+  "tenant_id": "A",
+  "status": "failed",
+  "start_date": "2026-07-01"
+}
+
+Then build a parameterized query in deterministic code.
+
+## 7. Risk classification and approval
+
+Classify tools by side effect:
+
+Read-only
+Low-risk write
+High-risk write
+Irreversible action
+
+Example policy:
+
+Search repository
+→ execute automatically
+
+Create draft email
+→ execute automatically
+
+Send email
+→ confirmation required
+
+Delete production repository
+→ privileged approval required
+
+The executor should enforce this policy, not the LLM.
+
+## 8. Retries
+
+The executor should retry only transient failures:
+
+Timeout
+HTTP 429
+HTTP 502/503
+Temporary connection reset
+
+It should not retry:
+
+401 Unauthorized
+403 Forbidden
+Invalid arguments
+Business-rule rejection
+Destructive operation without idempotency
+
+Use:
+
+exponential backoff,
+jitter,
+maximum attempts,
+overall retry budget.
+
+## 9. Timeouts and cancellation
+
+Every tool should have a timeout.
+
+Symbol lookup: 5 seconds
+Document extraction: 60 seconds
+Large analytics query: 30 seconds
+
+The executor should also propagate cancellation when the user cancels the request or the workflow expires.
+
+## 10. Rate limiting and quotas
+
+Apply limits by:
+
+user,
+tenant,
+tool,
+external provider,
+time window.
+
+This prevents one user or agent loop from exhausting the system.
+
+## 11. Caching
+
+Cache only when safe.
+
+Good candidates:
+
+Read-only symbol lookup
+Static documentation search
+Currency metadata
+Repository metadata
+
+Poor candidates:
+
+Current weather without a short TTL
+Account balance
+Deployment status
+Write operations
+User-specific sensitive data
+
+Cache keys must include relevant security scope, such as tenant and repository.
+
+## 12. Idempotency
+
+For side-effecting tools, use an idempotency key:
+
+Send email
+Create ticket
+Submit workflow
+Start deployment
+
+This prevents a retry from performing the same action twice.
+
+{
+  "idempotency_key": "conversation-123-action-7"
+}
+
+## 13. Circuit breakers
+
+If an external service repeatedly fails:
+
+Failures cross threshold
+        ↓
+Circuit opens
+        ↓
+Fail quickly
+        ↓
+Allow recovery probe later
+
+This protects the rest of the AI workflow from cascading failures.
+
+## 14. Result normalization
+
+External systems return inconsistent responses.
+
+The Tool Executor should translate them into stable contracts:
+
+{
+  "status": "success",
+  "data": {
+    "file": "DriverSubmission.cs",
+    "line": 219
+  },
+  "error": null,
+  "metadata": {
+    "duration_ms": 128,
+    "cached": false
+  }
+}
+
+For failure:
+
+{
+  "status": "not_found",
+  "data": null,
+  "error": {
+    "code": "SYMBOL_NOT_FOUND",
+    "retryable": false,
+    "message": "No matching symbol was found."
+  }
+}
+
+The LLM should receive useful, sanitized results—not raw internal stack traces.
+
+## 15. Observability and audit
+
+Record:
+
+correlation ID,
+user and tenant,
+selected tool,
+sanitized arguments,
+start and end time,
+latency,
+retry count,
+authorization decision,
+approval decision,
+external result status,
+token and cost attribution where relevant.
+
+Sensitive values must be redacted.
+
+For write operations, maintain an audit trail suitable for incident investigation and compliance.
+
+What Does Not Belong in the Tool Executor?
+
+The executor should not decide:
+
+the user's overall intent,
+which answer is most helpful,
+how to explain results,
+whether retrieved evidence answers the question,
+how to compose the final narrative,
+long-term conversation strategy,
+unrestricted autonomous planning.
+
+Those belong to:
+
+LLM / Agent Orchestrator
+Conversation Manager
+Retriever and Reranker
+Prompt Builder
+
+The Tool Executor should also not:
+
+invent missing arguments,
+silently broaden access,
+override authorization,
+expose secrets,
+trust unvalidated LLM output,
+directly place raw tool output into the user response.
+Responsibility Boundary
+LLM / Orchestrator
+- Understand intent
+- Select a tool
+- Propose arguments
+- Interpret the result
+- Decide the next reasoning step
+
+Tool Executor
+- Validate
+- Authorize
+- Enforce policy
+- Execute
+- Retry safely
+- Normalize
+- Observe and audit
+
+External system
+- Perform the actual operation
+- Enforce its own permissions
+- Return authoritative data
+
+The key principle is:
+
+The LLM decides what capability may be useful. The Tool Executor decides whether and how that capability may safely run.

@@ -1,0 +1,1456 @@
+# Designing AgentRuntime
+
+Think of AgentRuntime as the control-plane coordinator for one agent execution.
+
+It should not contain every implementation internally. It composes specialized components.
+
+High-level architecture
+                         Workflow Engine
+                                │
+                     Start / Resume / Cancel
+                                │
+                                ▼
+                         Agent Runtime
+                                │
+        ┌───────────────┬───────┼───────────────┐
+        ▼               ▼       ▼               ▼
+     Planner        State API  Policy API   Budget Manager
+        │               │       │               │
+        └───────────────┴───────┼───────────────┘
+                                ▼
+                        Action Validator
+                                │
+                                ▼
+                         Task Scheduler
+                                │
+                                ▼
+                         Tool Executor
+                                │
+                                ▼
+                         External Systems
+                                │
+                          Async result event
+                                │
+                                ▼
+                      Observation Processor
+                                │
+                                ▼
+                           Evaluators
+                                │
+                                ▼
+                     State / Event / Fact Stores
+Major components
+1. Goal Manager
+
+Responsible for:
+
+validating the requested goal,
+assigning a goal ID,
+selecting the correct agent profile,
+defining required outputs,
+loading completion criteria.
+
+Example:
+
+{
+  "goal_id": "goal-123",
+  "profile": "deployment-investigation-v3",
+  "objective": "Identify the cause of DriverSubmission latency regression",
+  "required_outputs": [
+    "timeline",
+    "root_cause",
+    "evidence",
+    "recommended_remediation"
+  ]
+}
+2. Context Builder
+
+Builds the planner input from:
+
+goal,
+current workflow state,
+known facts,
+active hypotheses,
+failed actions,
+relevant memory,
+available tools,
+remaining budget,
+policy constraints.
+
+It must compact this context so the planner does not receive the full event history.
+
+3. Planner
+
+Produces either:
+
+a high-level plan,
+the next action,
+a request for clarification,
+a completion recommendation.
+
+Example contract:
+
+{
+  "decision": "execute_action",
+  "action": {
+    "tool": "query_telemetry",
+    "arguments": {
+      "question": "Did certificate-validation duration increase after deployment 102?"
+    }
+  },
+  "expected_information_gain": "Confirm or reject the certificate-overhead hypothesis"
+}
+
+The Planner does not execute anything.
+
+4. Action Validator
+
+Checks:
+
+action schema,
+tool existence,
+state transition validity,
+required arguments,
+semantic duplicate detection,
+prerequisite completion,
+permitted action type.
+
+It should return explicit validation errors so the planner can repair the action.
+
+5. Policy Manager
+
+Checks:
+
+user authorization,
+tenant scope,
+data classification,
+environment restrictions,
+tool risk,
+approval requirements,
+mandatory filters,
+write restrictions.
+6. Budget Manager
+
+Tracks and reserves:
+
+wall-clock duration,
+model tokens,
+model cost,
+tool calls,
+external API cost,
+replans,
+no-progress attempts.
+
+Budget reservation should happen before scheduling a task.
+
+7. Task Scheduler
+
+Transforms an approved action into an executable task.
+
+{
+  "workflow_id": "wf-123",
+  "task_instance_id": "task-17",
+  "attempt_id": "attempt-1",
+  "tool_name": "query_telemetry",
+  "input_ref": "state://tasks/task-17/input",
+  "idempotency_key": "wf-123-task-17"
+}
+
+It places the task on the correct queue and transitions the workflow to waiting_for_task.
+
+8. Tool Executor interface
+
+The runtime should call the Tool Executor through a stable contract:
+
+class ToolExecutorPort:
+    async def schedule(self, task: ToolTask) -> TaskHandle:
+        ...
+
+    async def cancel(self, task_id: str) -> None:
+        ...
+
+    async def get_status(self, task_id: str) -> TaskStatus:
+        ...
+
+The runtime should not know how App Insights, SQL, GitHub, or email authentication works.
+
+That belongs inside specialized executors.
+
+9. Observation Processor
+
+When a task result arrives:
+
+Raw result reference
+   ↓
+Schema normalization
+   ↓
+Deterministic analytics
+   ↓
+Optional LLM synthesis
+   ↓
+Evidence validation
+   ↓
+Facts and hypotheses
+
+Its output must remain traceable to raw evidence.
+
+10. Evaluator
+
+Use multiple evaluators rather than one universal evaluator.
+
+Progress Evaluator
+Completion Evaluator
+Evidence Evaluator
+Business Rule Evaluator
+Safety Evaluator
+Cost/Benefit Evaluator
+
+Example combined result:
+
+{
+  "progress": {
+    "new_facts": 3,
+    "questions_resolved": 1,
+    "progress_score": 0.8
+  },
+  "completion": {
+    "goal_complete": false,
+    "missing_requirements": [
+      "confirm causal mechanism"
+    ]
+  },
+  "recommendation": "continue"
+}
+11. State Manager
+
+Owns authoritative state transitions.
+
+It should store:
+
+current workflow status,
+iteration,
+tasks,
+facts,
+hypotheses,
+budgets,
+approvals,
+checkpoints,
+planner and evaluator versions.
+
+The runtime should update state through optimistic concurrency.
+
+Read state version 12
+   ↓
+Compute transition
+   ↓
+Write version 13 only if current version is still 12
+
+This prevents two resumed workers from updating the same workflow incorrectly.
+
+12. Memory interface
+
+Memory is not the same as workflow state.
+
+The runtime may retrieve:
+
+user preferences,
+prior accepted investigation patterns,
+domain terminology,
+long-term project context.
+
+It should not automatically copy every workflow fact into persistent memory.
+
+Workflow facts
+→ workflow state
+
+Long-lived user preferences
+→ semantic memory
+
+Reusable procedures
+→ procedural memory
+
+Memory should be read through a controlled retrieval interface and written only after classification.
+
+13. Event and Audit Logger
+
+Every important transition should produce an immutable event:
+
+{
+  "event_type": "action_approved",
+  "workflow_id": "wf-123",
+  "task_id": "task-17",
+  "timestamp": "...",
+  "planner_version": "planner-v4",
+  "policy_version": "prod-policy-v8"
+}
+
+Events support:
+
+debugging,
+replay,
+audits,
+metrics,
+incident investigation.
+Lifecycle of AgentRuntime
+Start
+Receive user goal
+   ↓
+Select agent profile
+   ↓
+Create workflow state
+   ↓
+Build context
+   ↓
+Invoke planner
+Execute
+Planner proposes action
+   ↓
+Validate
+   ↓
+Check policy and budget
+   ↓
+Reserve budget
+   ↓
+Schedule task
+   ↓
+Checkpoint state
+   ↓
+Yield
+Resume
+Receive task-result event
+   ↓
+Load workflow state
+   ↓
+Deduplicate event
+   ↓
+Process observation
+   ↓
+Evaluate progress and completion
+   ↓
+Commit new state
+   ↓
+Continue, replan, stop, or await approval
+Finish
+Completion evaluator passes
+   ↓
+Generate final answer
+   ↓
+Validate citations and output schema
+   ↓
+Set terminal state
+   ↓
+Release resources
+Interaction with the Workflow Engine
+
+The Workflow Engine owns:
+
+durable lifecycle,
+timers,
+retries,
+waiting,
+cancellation,
+signal handling,
+task dependencies,
+resumability.
+
+The Agent Runtime owns:
+
+reasoning cycle,
+planner invocation,
+context construction,
+observations,
+agent-specific evaluations.
+
+A clean division is:
+
+Workflow Engine:
+When should this workflow run again?
+
+Agent Runtime:
+What should the agent reason about when it runs?
+
+The runtime may itself be implemented as a workflow activity or orchestrator step.
+
+Resumability
+
+To support resumability, persist before yielding:
+
+state version,
+pending task IDs,
+remaining budgets,
+facts and hypotheses,
+planner output,
+model and prompt versions,
+event offset.
+
+Never depend on:
+
+in-memory Python objects,
+open network connections,
+a particular server instance,
+conversation text alone.
+Replay
+
+Replay means reconstructing how the workflow reached its outcome.
+
+Store:
+
+Initial goal
+Agent profile version
+Every proposed action
+Every validation decision
+Every tool request
+Every result reference
+Every observation
+Every evaluation
+Every state transition
+
+There are two replay modes.
+
+Historical replay
+
+Use stored model outputs and tool results to reconstruct the original execution exactly.
+
+Re-execution
+
+Run the planner or tools again using the same inputs.
+
+This may produce different results because:
+
+model behavior can vary,
+external systems may have changed,
+telemetry may have expired.
+
+Therefore, historical replay is more reliable for auditing.
+
+Model replacement
+
+Hide models behind typed ports:
+
+class PlannerPort:
+    async def propose(
+        self,
+        context: PlannerContext
+    ) -> PlannerDecision:
+        ...
+
+Then implementations can be:
+
+OpenAIPlanner
+LocalModelPlanner
+SmallModelPlanner
+RulesBasedPlanner
+
+State stores should persist semantic outputs, not provider-specific response objects.
+
+Also version:
+
+model,
+prompt,
+schema,
+temperature or decoding settings,
+tool definitions.
+Observability
+
+At minimum, emit metrics for:
+
+Workflow completion rate
+Partial-result rate
+Average iterations
+Tool success rate
+Tool latency
+Planner latency
+Token usage
+Cost per workflow
+No-progress loops
+Policy denials
+Approval wait time
+Citation-validation failures
+Root-cause confidence
+
+Use distributed tracing across:
+
+User request
+→ workflow
+→ planner
+→ task
+→ executor
+→ external query
+→ observation
+→ evaluator
+
+Carry a shared workflow_id and trace context through every component.
+
+Simplified class sketch
+from dataclasses import dataclass
+from typing import Protocol
+
+
+@dataclass
+class RuntimeResult:
+    status: str
+    response: str | None = None
+
+
+class Planner(Protocol):
+    async def propose(self, context: dict) -> dict:
+        ...
+
+
+class AgentRuntime:
+    def __init__(
+        self,
+        planner: Planner,
+        state_store,
+        context_builder,
+        action_validator,
+        policy_manager,
+        budget_manager,
+        task_scheduler,
+        observation_processor,
+        evaluators,
+        audit_logger,
+    ):
+        self.planner = planner
+        self.state_store = state_store
+        self.context_builder = context_builder
+        self.action_validator = action_validator
+        self.policy_manager = policy_manager
+        self.budget_manager = budget_manager
+        self.task_scheduler = task_scheduler
+        self.observation_processor = observation_processor
+        self.evaluators = evaluators
+        self.audit_logger = audit_logger
+
+    async def run_iteration(self, workflow_id: str) -> RuntimeResult:
+        state = await self.state_store.load(workflow_id)
+
+        context = await self.context_builder.build(state)
+        decision = await self.planner.propose(context)
+
+        await self.audit_logger.record_planner_decision(
+            workflow_id, decision
+        )
+
+        if decision["decision"] == "complete":
+            evaluation = await self.evaluators.evaluate_completion(state)
+
+            if evaluation["goal_complete"]:
+                await self.state_store.mark_completed(workflow_id)
+                return RuntimeResult(
+                    status="completed",
+                    response=decision.get("response"),
+                )
+
+            return RuntimeResult(status="replan_required")
+
+        action = decision["action"]
+
+        self.action_validator.validate(action, state)
+        self.policy_manager.authorize(action, state)
+        self.budget_manager.reserve(action, state)
+
+        task = await self.task_scheduler.schedule(
+            workflow_id=workflow_id,
+            action=action,
+        )
+
+        await self.state_store.mark_waiting(
+            workflow_id=workflow_id,
+            task_id=task.task_id,
+        )
+
+        return RuntimeResult(status="waiting_for_task")
+
+    async def resume_with_result(
+        self,
+        workflow_id: str,
+        task_result: dict,
+    ) -> RuntimeResult:
+        state = await self.state_store.load(workflow_id)
+
+        if await self.state_store.result_already_processed(
+            task_result["task_id"]
+        ):
+            return RuntimeResult(status="duplicate_result_ignored")
+
+        observations = await self.observation_processor.process(
+            task_result
+        )
+
+        evaluation = await self.evaluators.evaluate(
+            state=state,
+            observations=observations,
+        )
+
+        await self.state_store.commit_observation_and_evaluation(
+            workflow_id=workflow_id,
+            observations=observations,
+            evaluation=evaluation,
+            expected_version=state["version"],
+        )
+
+        if evaluation["goal_complete"]:
+            return RuntimeResult(status="ready_to_finalize")
+
+        if evaluation["budget_exhausted"]:
+            return RuntimeResult(status="partial_result")
+
+        return RuntimeResult(status="continue")
+
+The important part is not the exact Python structure. It is the ownership boundary:
+
+AgentRuntime coordinates the reasoning cycle but delegates durable workflow management, security, execution, storage, and domain validation to specialized components.
+
+Can you talk more about How AgentRuntime profile is chosen in first place? Few examples of different AgentRuntime?
+
+An AgentRuntime profile is usually selected by a deterministic routing layer before the agent loop begins.
+
+Think of a profile as a versioned configuration for a class of tasks.
+
+User request
+   ↓
+Intent and risk classification
+   ↓
+Profile selection
+   ↓
+AgentRuntime starts with that profile
+
+The profile tells the runtime:
+
+what kind of goal this is,
+which tools may be used,
+what state schema to maintain,
+which planner and evaluator to use,
+what completion means,
+what budgets and approvals apply.
+What is inside an AgentRuntime profile?
+
+A profile might look conceptually like this:
+
+{
+  "profile_id": "deployment-investigation-v3",
+  "goal_type": "deployment_investigation",
+  "planner": "incident-investigation-planner-v2",
+  "state_schema": "incident-state-v4",
+  "allowed_tools": [
+    "query_logs",
+    "search_deployments",
+    "read_configuration",
+    "search_incidents"
+  ],
+  "evaluators": [
+    "progress-evaluator",
+    "root-cause-evaluator",
+    "evidence-evaluator"
+  ],
+  "completion_policy": "incident-completion-v3",
+  "budgets": {
+    "max_tool_calls": 20,
+    "max_duration_minutes": 15,
+    "max_replans": 3
+  },
+  "approval_policy": {
+    "read_only": "automatic",
+    "rollback": "human_approval"
+  }
+}
+
+The runtime implementation may remain the same. The profile changes its behavior.
+
+Same AgentRuntime code
+        +
+Different profile
+        =
+Different agent behavior
+Who chooses the profile?
+
+Usually, a component called something like:
+
+Task Router
+Intent Classifier
+Goal Classifier
+Agent Registry
+Capability Router
+
+performs the selection.
+
+User Request
+      ↓
+Goal Normalizer
+      ↓
+Task Classifier
+      ↓
+Risk Classifier
+      ↓
+Profile Registry
+      ↓
+Selected Runtime Profile
+
+The selection can use deterministic rules, an LLM classifier, or a hybrid.
+
+Step 1 — Normalize the request
+
+Suppose the user asks:
+
+Compare these three companies and tell me which has the strongest financial position.
+
+The system first converts this into a structured goal:
+
+{
+  "objective": "compare_companies",
+  "entities": [
+    "Company A",
+    "Company B",
+    "Company C"
+  ],
+  "dimensions": [
+    "growth",
+    "profitability",
+    "cash_generation",
+    "liquidity"
+  ],
+  "requested_output": "ranked_comparison",
+  "side_effects": false
+}
+
+This makes classification easier than routing directly from raw text.
+
+Step 2 — Classify the task
+
+The classifier may produce:
+
+{
+  "task_family": "financial_analysis",
+  "task_type": "multi_company_comparison",
+  "requires_tools": true,
+  "requires_iteration": true,
+  "risk_level": "medium",
+  "confidence": 0.94
+}
+
+This output is not yet the execution plan.
+
+It only identifies the task category.
+
+Step 3 — Apply deterministic eligibility rules
+
+Even if the classifier says financial_analysis, application rules may refine the choice.
+
+For example:
+
+One supplied paragraph
+→ simple LLM profile
+
+Multiple uploaded financial reports
+→ financial comparison agent
+
+Live stock price requested
+→ live-market-data profile
+
+Investment recommendation requested
+→ financial-analysis profile with additional disclaimer and approval rules
+
+The deterministic layer can inspect:
+
+number and type of documents,
+available connected systems,
+requested actions,
+user permissions,
+environment,
+data sensitivity,
+expected latency,
+risk.
+Step 4 — Select from a Profile Registry
+
+The registry contains supported profiles:
+
+Profile Registry
+├── document-summary-v2
+├── financial-comparison-v4
+├── deployment-investigation-v3
+├── repository-debugging-v2
+├── support-triage-v5
+└── document-extraction-v3
+
+The router returns:
+
+{
+  "selected_profile": "financial-comparison-v4",
+  "reason_codes": [
+    "MULTIPLE_COMPANIES",
+    "CROSS_DOCUMENT_ANALYSIS",
+    "ITERATIVE_EVIDENCE_RETRIEVAL"
+  ]
+}
+
+Reason codes are useful for auditability.
+
+Three common profile-selection approaches
+1. Deterministic routing
+
+Use fixed rules.
+
+if task_type == "document_summary":
+    profile = "document-summary-v2"
+elif task_type == "deployment_investigation":
+    profile = "deployment-investigation-v3"
+
+Best when:
+
+task categories are well known,
+high predictability is needed,
+routing errors would be costly.
+
+Weakness:
+
+hard to cover ambiguous language,
+rules grow over time.
+2. LLM-based classification
+
+Give the model a list of supported profiles and ask it to select one.
+
+{
+  "selected_profile": "repository-debugging-v2",
+  "confidence": 0.89,
+  "reason": "The request requires adaptive investigation across code, commits, and logs."
+}
+
+Best when:
+
+users express goals in many different ways,
+tasks have semantic ambiguity,
+categories overlap.
+
+Weakness:
+
+classification can be inconsistent,
+unsupported profiles may be hallucinated unless constrained.
+
+The output should therefore use an enum of registered profiles.
+
+3. Hybrid routing
+
+This is usually best.
+
+Deterministic pre-checks
+        ↓
+LLM semantic classification
+        ↓
+Deterministic eligibility validation
+        ↓
+Profile selected
+
+For example:
+
+User requests deletion
+→ deterministic high-risk path
+
+Otherwise
+→ LLM classifies domain and intent
+
+Then
+→ registry validates tools, permissions and available data
+Example 1 — Document Summary Runtime
+
+User goal:
+
+Summarize this annual report.
+
+This may not need a fully agentic loop.
+
+Profile:
+
+{
+  "profile_id": "document-summary-v2",
+  "runtime_mode": "single_pass",
+  "allowed_tools": [
+    "read_document",
+    "retrieve_sections"
+  ],
+  "planner": null,
+  "evaluators": [
+    "coverage-evaluator",
+    "citation-evaluator"
+  ],
+  "max_tool_calls": 3
+}
+
+Flow:
+
+Read document
+   ↓
+Select important sections
+   ↓
+Generate summary
+   ↓
+Validate citations
+   ↓
+Stop
+
+It uses the same runtime platform, but with little or no adaptive planning.
+
+Example 2 — Financial Comparison Agent
+
+User goal:
+
+Compare three companies and identify the strongest financially.
+
+Profile:
+
+{
+  "profile_id": "financial-comparison-v4",
+  "runtime_mode": "bounded_agent",
+  "allowed_tools": [
+    "search_financial_documents",
+    "extract_metric",
+    "normalize_currency",
+    "calculate_growth",
+    "compare_metrics"
+  ],
+  "state_schema": "financial-comparison-state-v3",
+  "evaluators": [
+    "metric-completeness-evaluator",
+    "comparability-evaluator",
+    "citation-evaluator",
+    "ranking-evaluator"
+  ],
+  "max_tool_calls": 18,
+  "max_replans": 2
+}
+
+Its state might track:
+
+Companies processed
+Metrics found
+Missing values
+Currencies
+Periods
+Sources
+Comparison score
+
+Its completion criteria are financial-analysis-specific.
+
+Example 3 — Deployment Investigation Agent
+
+User goal:
+
+Find why Driver Submission latency increased after deployment 102.
+
+Profile:
+
+{
+  "profile_id": "deployment-investigation-v3",
+  "runtime_mode": "investigation_agent",
+  "allowed_tools": [
+    "query_logs",
+    "query_metrics",
+    "search_deployments",
+    "read_configuration",
+    "search_incidents"
+  ],
+  "state_schema": "incident-investigation-state-v5",
+  "evaluators": [
+    "progress-evaluator",
+    "hypothesis-evaluator",
+    "root-cause-evaluator"
+  ],
+  "max_tool_calls": 25,
+  "max_duration_minutes": 20
+}
+
+Its state tracks:
+
+Timeline
+Facts
+Hypotheses
+Rejected hypotheses
+Affected components
+Deployment changes
+Root-cause confidence
+
+This is very different from financial comparison, even though both use the same core runtime.
+
+Example 4 — Repository Debugging Agent
+
+User goal:
+
+Find why CreateSubmissionAsync started failing after the latest change.
+
+Profile:
+
+{
+  "profile_id": "repository-debugging-v2",
+  "allowed_tools": [
+    "search_symbol",
+    "read_source_file",
+    "search_commit_history",
+    "inspect_call_graph",
+    "search_tests",
+    "search_build_logs"
+  ],
+  "evaluators": [
+    "code-evidence-evaluator",
+    "change-correlation-evaluator",
+    "reproduction-evaluator"
+  ]
+}
+
+Its planner may choose:
+
+Find symbol
+→ inspect recent commits
+→ inspect callers
+→ correlate test failures
+→ propose root cause
+
+It would not need financial metric tools or currency normalization.
+
+Example 5 — Support Triage Agent
+
+User goal:
+
+Customer reports that file uploads intermittently fail.
+
+Profile:
+
+{
+  "profile_id": "support-triage-v5",
+  "allowed_tools": [
+    "search_customer_tickets",
+    "query_logs",
+    "check_service_health",
+    "search_known_incidents",
+    "read_customer_configuration"
+  ],
+  "evaluators": [
+    "severity-evaluator",
+    "known-issue-evaluator",
+    "escalation-evaluator"
+  ],
+  "approval_policy": {
+    "create_internal_ticket": "automatic",
+    "contact_customer": "approval"
+  }
+}
+
+Its completion states may include:
+
+Known issue identified
+Workaround available
+Engineering escalation required
+Insufficient customer information
+Same goal family, different profiles
+
+Even within one domain, risk and complexity may produce different profiles.
+
+For example:
+
+Read-only deployment investigation
+→ deployment-investigation-readonly
+
+Deployment investigation with rollback capability
+→ deployment-remediation-agent
+
+Production rollback
+→ human-approved-remediation-runtime
+
+The planner may be similar, but tool permissions and approval boundaries differ significantly.
+
+Profile composition
+
+In larger systems, profiles may be composed instead of duplicated.
+
+Base Investigation Profile
+        +
+Telemetry Capability
+        +
+Repository Capability
+        +
+Production Read-Only Policy
+        =
+Deployment Investigation Profile
+
+Example:
+
+{
+  "base_profile": "investigation-agent-v2",
+  "capability_sets": [
+    "telemetry-read",
+    "deployment-read",
+    "configuration-read"
+  ],
+  "policy_set": "production-readonly-v4",
+  "completion_template": "root-cause-analysis-v3"
+}
+
+This avoids defining every profile from scratch.
+
+What happens when routing is uncertain?
+
+Suppose the user says:
+
+Investigate why revenue dropped.
+
+This could mean:
+
+analyze uploaded financial documents,
+query a business intelligence database,
+inspect application billing telemetry,
+research public market information.
+
+The router may return:
+
+{
+  "candidate_profiles": [
+    {
+      "profile": "financial-document-analysis-v3",
+      "confidence": 0.51
+    },
+    {
+      "profile": "business-metrics-investigation-v2",
+      "confidence": 0.44
+    }
+  ],
+  "missing_information": [
+    "data_source"
+  ]
+}
+
+The system can then:
+
+resolve from available context,
+inspect uploaded documents or connected systems,
+ask the user only when necessary,
+fall back to a restricted general research profile.
+
+Do not silently select a high-privilege profile when confidence is low.
+
+Profile switching during execution
+
+Sometimes the initial profile is correct, but the task expands.
+
+Example:
+
+Initial profile:
+Deployment investigation
+
+Finding:
+Rollback is recommended
+
+New requirement:
+Execute rollback
+
+The runtime should not simply expose the rollback tool.
+
+Instead:
+
+Deployment investigation profile
+        ↓
+Produces remediation proposal
+        ↓
+Workflow transition request
+        ↓
+Human approval
+        ↓
+New remediation profile
+
+This is called escalation or profile transition.
+
+Investigation Agent
+→ Remediation Agent
+
+The new profile may have:
+
+stronger authorization,
+stricter approval,
+lower action limits,
+separate audit rules.
+Profile selection should consider risk separately from intent
+
+Two users may ask the same thing:
+
+Restart the production service.
+
+But their authorization differs.
+
+Profile selection should use:
+
+Intent
++
+User identity
++
+Environment
++
+Risk
++
+Permissions
++
+Available capabilities
+
+An engineer may get:
+
+production-remediation-with-approval
+
+A read-only analyst may get:
+
+remediation-recommendation-only
+
+The goal is the same, but runtime authority differs.
+
+Recommended selection architecture
+                    User Request
+                          │
+                          ▼
+                   Goal Normalizer
+                          │
+                          ▼
+                Intent / Domain Classifier
+                          │
+                          ▼
+                    Risk Classifier
+                          │
+                          ▼
+                 Capability Resolver
+                          │
+                          ▼
+              Authorization / Policy Check
+                          │
+                          ▼
+                    Profile Registry
+                          │
+              ┌───────────┴───────────┐
+              ▼                       ▼
+        Profile selected       Ambiguous / denied
+              │                       │
+              ▼                       ▼
+       AgentRuntime starts     Clarify or safe fallback
+Key design principle
+
+The router should answer:
+
+Which controlled reasoning environment is appropriate for this goal?
+
+The planner later answers:
+
+Within that environment, what should I do next?
+
+Those are separate decisions.
+
+Profile Router
+→ selects the type of agent
+
+Agent Planner
+→ selects the next action
+
+A production system normally has one reusable AgentRuntime framework, many versioned profiles, and possibly several specialized runtime modes such as single-pass, investigation, analysis, and remediation.
+
+From this it seems like we should think through and have different types of tools and evaluators built upfront?
+
+Yes—at least the core tool families, evaluator types, schemas, and safety boundaries should be designed upfront.
+
+But you do not need to build every possible tool or evaluator before launching.
+
+A practical pattern is:
+
+Start with a small capability set
+        ↓
+Run real workflows
+        ↓
+Observe gaps and repeated patterns
+        ↓
+Add reusable tools and evaluators
+
+Think in layers.
+
+Build upfront
+
+You should define the stable contracts first:
+
+Tool interface
+Evaluator interface
+Action schema
+Observation schema
+Fact / hypothesis schema
+Policy model
+Budget model
+Profile model
+
+You should also build the cross-cutting evaluators that nearly every agent needs:
+
+action validity,
+progress detection,
+completion checking,
+evidence grounding,
+duplicate-action detection,
+budget exhaustion,
+policy compliance.
+
+And a small set of general-purpose tools, such as:
+
+Document retrieval
+Telemetry query
+Database read
+Repository search
+HTTP/API call
+Calculation
+Object storage read/write
+
+These can then have domain-specific adapters.
+
+Build per domain
+
+Some tools and evaluators must be domain-aware.
+
+For deployment investigation:
+
+Tools
+- query_logs
+- query_metrics
+- read_deployment
+- compare_configuration
+
+Evaluators
+- hypothesis progress
+- timeline consistency
+- root-cause confidence
+- alternative-cause coverage
+
+For financial analysis:
+
+Tools
+- extract_metric
+- normalize_currency
+- compare_periods
+- calculate_growth
+
+Evaluators
+- period comparability
+- GAAP/non-GAAP consistency
+- metric completeness
+- citation coverage
+
+The runtime remains common; these capabilities differ.
+
+Do not make everything tool-specific
+
+Avoid one evaluator per individual tool:
+
+query_logs_evaluator
+query_metrics_evaluator
+read_config_evaluator
+
+That becomes unmanageable.
+
+Prefer evaluators based on the quality being assessed:
+
+EvidenceEvaluator
+ProgressEvaluator
+CompletenessEvaluator
+ConsistencyEvaluator
+RiskEvaluator
+DomainEvaluator
+
+They can be configured by profile.
+
+For example:
+
+{
+  "evaluator": "evidence_evaluator",
+  "rules": {
+    "require_source_reference": true,
+    "minimum_independent_sources": 2,
+    "allow_correlation_as_root_cause": false
+  }
+}
+Tool design follows a similar principle
+
+Use narrow, composable capabilities rather than one giant tool:
+
+Good
+- search_logs
+- fetch_trace
+- compare_time_windows
+- read_deployment_metadata
+
+Too broad
+- investigate_incident_and_find_root_cause
+
+The broad tool hides the reasoning loop and makes auditability difficult.
+
+But tools should not be excessively low-level either:
+
+Too low-level
+- open_connection
+- send_kql_string
+- download_row_page
+
+Those are implementation details of the telemetry executor.
+
+The useful abstraction is usually a business or evidence-gathering capability:
+
+compare_service_latency_before_after_deployment
+
+or a reusable semantic tool:
+
+query_telemetry
+
+with structured intent.
+
+A good initial platform
+
+For your first production-style agent platform, I would build:
+
+Shared runtime
+- state manager
+- planner
+- action validator
+- policy manager
+- budget manager
+- task scheduler
+- observation processor
+- audit and tracing
+
+Shared evaluators
+- schema validity
+- evidence grounding
+- progress
+- completion
+- duplication
+- budget
+- safety/policy
+
+Initial tool families
+- document retrieval
+- structured extraction
+- telemetry search
+- repository search
+- deterministic calculator
+
+Then create one complete profile, such as:
+
+deployment-investigation-v1
+
+Build it end to end before adding ten profiles.
+
+The key architectural balance
+
+Too little upfront design gives you:
+
+Ad hoc tools
+Inconsistent outputs
+No common evaluation
+Hard-coded agent logic
+
+Too much upfront design gives you:
+
+A huge generic platform
+Many unused abstractions
+Slow delivery
+Incorrect assumptions about future tasks
+
+The right strategy is:
+
+Design the contracts and common controls upfront; implement domain capabilities incrementally from real use cases.
+
+Your first agent profile becomes the proving ground. Once you see the same pattern repeated in two or three profiles, promote it into the shared runtime or shared evaluator library.
