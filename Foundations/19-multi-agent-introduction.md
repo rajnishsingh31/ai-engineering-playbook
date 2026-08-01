@@ -113,12 +113,16 @@ Multiple agents are justified when authority must be isolated, not merely when r
 
 Consider software release management:
 
+```text
+
 Release Manager Agent
         │
         ├── Build Readiness Agent
         ├── Security Compliance Agent
         ├── Test Quality Agent
         └── Deployment Readiness Agent
+
+```
 
 Each sub-agent has its own goal:
 
@@ -174,11 +178,15 @@ One agent may finish in seconds, while another may operate for days.
 
 Example:
 
+```text
+
 Hiring Coordinator
         │
         ├── Resume Screening Agent
         ├── Interview Scheduling Agent
         └── Candidate Follow-up Agent
+
+```
 
 These have different:
 

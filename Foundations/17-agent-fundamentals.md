@@ -1150,6 +1150,8 @@ This is safer and easier to operate than making the entire application autonomou
 
 For the Financial Document Assistant:
 
+```text
+
                 Deterministic Workflow
                          │
        ┌─────────────────┼──────────────────┐
@@ -1171,6 +1173,8 @@ Document ingestion   Metric extraction   Validation
                                               │
                                               ▼
                                          Final report
+
+```
 
 The agent does not control:
 
@@ -1487,6 +1491,8 @@ budget enforcement.
 
 A strong production pattern remains:
 
+```text
+
 Deterministic ingestion
         ↓
 Deterministic extraction and normalization
@@ -1496,6 +1502,8 @@ Bounded agentic investigation
 Deterministic validation
         ↓
 Controlled delivery
+
+```
 
 The key lesson is:
 

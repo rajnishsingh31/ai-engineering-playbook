@@ -240,7 +240,7 @@ AI Traces
 Think of this like OpenTelemetry.
 
 Instead of:
-
+```text
 API A
 
 ↓
@@ -278,10 +278,12 @@ LLM
 ↓
 
 Evaluation
-
+```
 Everything belongs to one trace.
 
 Example Trace
+
+```text
 Request
 
 ↓
@@ -318,6 +320,7 @@ Citation Validation
 ↓
 
 Response
+```
 
 Now debugging becomes easy.
 
@@ -431,7 +434,7 @@ These tell you whether the AI is healthy.
 Suppose users complain.
 
 Observability helps isolate the problem.
-
+```text
 Wrong Answer
       │
       ├── Wrong Retrieval?
@@ -443,7 +446,7 @@ Wrong Answer
       ├── Hallucination?
       │
       └── Missing Document?
-
+```
 Without traces you're guessing.
 
 ### Dashboards
@@ -487,7 +490,7 @@ One of the most powerful capabilities.
 Given a Request ID:
 
 Replay:
-
+```text
 Question
 
 ↓
@@ -509,13 +512,13 @@ Tool Calls
 ↓
 
 Response
-
+```
 You can reproduce customer issues.
 
 Correlation IDs
 
 Everything should share one ID.
-
+```text
 Workflow ID
 
 ↓
@@ -540,10 +543,10 @@ Evaluation
 
 ↓
 
-### Audit
-
+Audit
+```
 Exactly like microservices.
-
+```text
 AI Observability Stack
                  Request
                     │
@@ -561,7 +564,7 @@ AI Observability Stack
              Metrics Store
                     ▼
              Dashboards
-
+```
 ### What Should NOT Be Logged
 
 This is just as important.
@@ -601,7 +604,7 @@ If you can answer those seven questions, your AI system is observable.
 The Three Pillars of Production AI
 
 We've now covered three of the most important topics:
-
+```text
 Evaluation
       │
 Measures quality
@@ -613,5 +616,5 @@ Protects the system
 Observability
       │
 Explains the system
-
+```
 Almost every production AI platform is built around these three pillars.

@@ -30,6 +30,8 @@ Before Tool Calling
 
 Old pipeline:
 
+```text
+
 User
    │
    ▼
@@ -37,6 +39,8 @@ LLM
    │
    ▼
 Answer
+
+```
 
 The LLM could only answer from:
 
@@ -49,6 +53,8 @@ Nothing else.
 ## After Tool Calling
 
 Now the pipeline becomes:
+
+```text
 
 User
    │
@@ -76,6 +82,8 @@ Answer      Tool Request
                  │
                  ▼
              Final Answer
+
+```
 
 Notice something important.
 

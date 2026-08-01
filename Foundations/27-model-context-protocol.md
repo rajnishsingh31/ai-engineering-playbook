@@ -18,7 +18,7 @@ AWS
 Kubernetes
 
 Without MCP, every application writes its own integrations.
-
+```text
 My Agent
     ├── GitHub SDK
     ├── Jira SDK
@@ -26,7 +26,7 @@ My Agent
     ├── SQL Client
     ├── Azure SDK
     └── ...
-
+```
 Now another team builds another agent.
 
 They write the same integrations again.
@@ -60,6 +60,7 @@ It is not another framework like LangChain.
 It is a communication protocol.
 
 ### Before MCP
+```text
 Agent A
     ├── GitHub integration
     ├── SQL integration
@@ -69,10 +70,11 @@ Agent B
     ├── GitHub integration
     ├── SQL integration
     └── Slack integration
-
+```
 Everyone rewrites everything.
 
 ### After MCP
+```text
 Agent
     │
     ▼
@@ -88,7 +90,7 @@ MCP Servers
     ├── Files
     ├── Kubernetes
     └── Azure
-
+```
 The agent only speaks MCP.
 
 Servers expose capabilities.
@@ -222,7 +224,7 @@ Notice something familiar.
 We already designed tool schemas.
 
 Example:
-
+```text
 {
   "name": "search_logs",
   "description": "...",
@@ -233,7 +235,7 @@ Example:
       ...
   }
 }
-
+```
 MCP formalizes this.
 
 When we studied:
@@ -315,7 +317,7 @@ Much easier.
 Remember our security chapter?
 
 MCP fits perfectly.
-
+```text
 LLM
 
 ↓
@@ -337,7 +339,7 @@ MCP Server
 ↓
 
 External System
-
+```
 Notice:
 
 The LLM still shouldn't directly execute tools.
@@ -402,7 +404,7 @@ Huge reduction in duplicated work.
 Where MCP Fits
 
 Let's place it in the architecture we've been building.
-
+```text
                 User
                   │
                   ▼
@@ -427,7 +429,7 @@ Let's place it in the architecture we've been building.
         ├── Slack
         ├── Azure
         └── Jira
-
+```
 Notice:
 
 **MCP sits where our Tool Executor / Connector Layer used to be.**

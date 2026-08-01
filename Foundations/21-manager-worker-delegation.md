@@ -36,6 +36,8 @@ Can we launch this AI product in Europe next quarter?
 
 The global goal spans several domains:
 
+```text
+
 Launch readiness
 ├── Technical readiness
 ├── Security readiness
@@ -43,9 +45,13 @@ Launch readiness
 ├── Financial viability
 └── Delivery schedule
 
+```
+
 No individual worker owns the entire launch decision.
 
 Each worker receives a bounded subgoal.
+
+```text
 
 Legal worker
 {
@@ -79,6 +85,8 @@ Security worker
   ]
 }
 
+```
+
 The manager later combines those local conclusions into the global decision.
 
 ## 2. Delegation should produce bounded subgoals
@@ -96,6 +104,7 @@ how deeply to investigate,
 when to stop.
 
 A better request is:
+```text
 
 {
   "task_id": "security-readiness-01",
@@ -120,6 +129,8 @@ A better request is:
   }
 }
 
+```
+
 The worker still has freedom to investigate, but only inside a clear boundary.
 
 The manager delegates an outcome, not unrestricted autonomy.
@@ -127,6 +138,8 @@ The manager delegates an outcome, not unrestricted autonomy.
 ## 3. Who creates the subgoals?
 
 Usually, the manager’s planner generates a proposed decomposition.
+
+```text
 
 Global Goal
     ↓
@@ -161,6 +174,8 @@ Example planner output:
   ]
 }
 
+```
+
 But deterministic application logic should validate:
 
 whether each capability exists,
@@ -174,6 +189,7 @@ whether the expected cost is within budget.
 The manager should not select workers only by name.
 
 Use a capability registry.
+```text
 
 {
   "agent_id": "security-agent-v3",
@@ -211,6 +227,8 @@ Latency
 +
 Output contract compatibility
 
+```
+
 For example, two finance agents may exist:
 
 Fast Finance Agent
@@ -226,6 +244,8 @@ The manager may choose based on task complexity.
 The worker should not return a long unstructured essay.
 
 Prefer a contract such as:
+
+```text
 
 {
   "task_id": "security-readiness-01",
@@ -249,6 +269,7 @@ Prefer a contract such as:
   ],
   "unresolved_questions": []
 }
+```
 
 This makes aggregation much easier.
 
@@ -336,6 +357,8 @@ are there unresolved blockers?
 
 Example:
 
+```text
+
 {
   "worker_result_sufficient": false,
   "missing_requirements": [
@@ -344,6 +367,7 @@ Example:
   ],
   "recommended_action": "request_targeted_follow_up"
 }
+```
 
 The manager can then issue a narrower follow-up:
 
@@ -425,6 +449,8 @@ loops,
 excessive latency,
 hard-to-follow audit trails.
 
+```text
+
 Profiles should define:
 
 {
@@ -432,6 +458,7 @@ Profiles should define:
   "maximum_total_agents": 6,
   "maximum_subtasks": 12
 }
+```
 
 A worker may be allowed to use tools but not delegate further.
 
@@ -450,6 +477,8 @@ Specialist
 
 Independent subgoals can run concurrently.
 
+```text
+
                     Manager
           ┌────────────┼────────────┐
           ▼            ▼            ▼
@@ -459,6 +488,8 @@ Independent subgoals can run concurrently.
                     Fan-in
                        ▼
                   Aggregation
+
+```
 
 The manager checkpoints state and waits asynchronously.
 
@@ -470,6 +501,7 @@ Stop at deadline
 Return qualified result if optional analysis is missing
 
 Example:
+```text
 
 {
   "mandatory_agents": [
@@ -482,6 +514,7 @@ Example:
   ],
   "deadline": "10 minutes"
 }
+```
 
 ## 13. Handling worker failure
 
@@ -496,7 +529,7 @@ Request human legal review
 Fail the whole workflow
 
 The policy depends on whether legal analysis is mandatory.
-
+```text
 {
   "worker": "legal-agent",
   "status": "failed",
@@ -504,7 +537,7 @@ The policy depends on whether legal analysis is mandatory.
   "fallback": "human_legal_review",
   "global_workflow_action": "pause"
 }
-
+```
 A manager should not silently omit a failed mandatory domain and still claim a complete answer.
 
 ## 14. Handling contradictions
@@ -518,7 +551,7 @@ Engineering Agent:
 Encryption is enabled in production.
 
 The manager should preserve both claims and trigger a resolution task.
-
+```text
 {
   "conflict_id": "conflict-12",
   "claim_a": {
@@ -531,7 +564,7 @@ The manager should preserve both claims and trigger a resolution task.
   },
   "resolution_question": "Is production customer data encrypted at rest and in transit?"
 }
-
+```
 Resolution may use:
 
 authoritative configuration,
@@ -596,7 +629,7 @@ The manager can fetch specific evidence when required.
 ## 17. Manager state
 
 A manager’s state might look like:
-
+```text
 {
   "global_goal": "Assess European launch readiness",
   "delegated_tasks": [
@@ -626,7 +659,7 @@ A manager’s state might look like:
     "duration_seconds": 280
   }
 }
-
+```
 The manager should not reconstruct delegation state from chat messages.
 
 ## 18. The manager does not need to be an LLM for everything
@@ -649,7 +682,7 @@ generating targeted follow-ups,
 identifying semantic contradictions.
 
 A strong design combines both.
-
+```text
 Recommended architecture
                          User Goal
                              │
@@ -688,7 +721,7 @@ Recommended architecture
              │
              ▼
          Final Response
-
+```
 ## Core principles
 The manager owns the global goal.
 
@@ -722,7 +755,7 @@ How should the manager represent, resolve, and synthesize these results?
 1. Goal normalization
 
 Convert the user request into a structured global goal:
-
+```text
 {
   "goal_type": "production_readiness_assessment",
   "system": "AI Customer Support Platform",
@@ -734,7 +767,7 @@ Convert the user request into a structured global goal:
     "critical_controls_cannot_be_waived_by_agent": true
   }
 }
-
+```
 The product and governance teams define what production readiness means.
 
 2. Goal decomposition
@@ -769,7 +802,7 @@ expected cost and latency,
 health and availability.
 
 Example:
-
+```text
 {
   "agent_id": "security-readiness-agent-v3",
   "capabilities": [
@@ -780,13 +813,13 @@ Example:
   "access_mode": "read_only",
   "output_schema": "security-readiness-v2"
 }
-
+```
 The manager selects by capability and policy—not merely by agent name.
 
 4. Task contracts
 
 Each worker gets a bounded contract:
-
+```text
 {
   "task_id": "security-assessment-01",
   "objective": "Assess production security readiness.",
@@ -814,13 +847,13 @@ Each worker gets a bounded contract:
     "max_duration_minutes": 10
   }
 }
-
+```
 Workers may adapt their local investigation, but they cannot expand beyond the assigned scope.
 
 5. Parallel execution
 
 Independent assessments run concurrently:
-
+```text
                  Manager
         ┌──────────┼──────────┐
         ▼          ▼          ▼
@@ -830,13 +863,13 @@ Independent assessments run concurrently:
         └──────────┼──────────┘
                    ▼
                  Fan-in
-
+```
 The Workflow Engine schedules tasks asynchronously and persists manager state while waiting.
 
 6. Mandatory versus optional workers
 
 Example policy:
-
+```text
 {
   "mandatory_workers": [
     "security",
@@ -851,7 +884,7 @@ Example policy:
     "user_experience"
   ]
 }
-
+```
 A mandatory-worker failure prevents a complete readiness decision.
 
 An optional-worker failure may permit a qualified result, provided it is disclosed.
@@ -859,7 +892,7 @@ An optional-worker failure may permit a qualified result, provided it is disclos
 7. Global state
 
 The manager maintains authoritative structured state:
-
+```text
 {
   "workflow_id": "readiness-101",
   "global_status": "assessing",
@@ -879,7 +912,7 @@ The manager maintains authoritative structured state:
   },
   "state_version": 12
 }
-
+```
 Large worker evidence remains in evidence storage and is referenced by ID.
 
 8. Worker-result evaluation
@@ -922,7 +955,7 @@ Reject result
 9. Conflict handling
 
 The manager records both supporting and contradictory claims rather than overwriting one.
-
+```text
 {
   "conflict_id": "conflict-7",
   "topic": "production encryption",
@@ -940,7 +973,7 @@ The manager records both supporting and contradictory claims rather than overwri
   ],
   "status": "unresolved"
 }
-
+```
 The manager should then consult the most authoritative source, such as actual production configuration rather than intended architecture.
 
 High-impact unresolved conflicts require human review.
@@ -948,7 +981,7 @@ High-impact unresolved conflicts require human review.
 10. Follow-ups
 
 Follow-up tasks should be narrow:
-
+```text
 {
   "objective": "Verify whether production customer-data storage has encryption enabled.",
   "allowed_sources": [
@@ -962,13 +995,13 @@ Follow-up tasks should be narrow:
     "evidence"
   ]
 }
-
+```
 This is preferable to rerunning the entire Security Agent.
 
 11. Delegation limits
 
 The profile should constrain:
-
+```text
 {
   "maximum_delegation_depth": 2,
   "maximum_total_agents": 10,
@@ -976,7 +1009,7 @@ The profile should constrain:
   "maximum_conflict_resolution_tasks": 3,
   "maximum_replans": 2
 }
-
+```
 Specialist workers would usually be prohibited from further delegation unless explicitly allowed.
 
 12. Budgets
@@ -1066,7 +1099,10 @@ The system should be able to answer:
 
 Why was the platform declared ready, and which evidence supported every required control?
 
-Final architecture
+## Final architecture
+
+```text
+
 User Goal
     ↓
 Goal Normalizer
@@ -1094,6 +1130,8 @@ Human Launch Approval
 Final Readiness Decision
 
 The core separation is:
+
+```
 
 Domain agents assess local readiness. The manager synthesizes global readiness. Deterministic policy and authorized humans control the final production-launch decision.
 

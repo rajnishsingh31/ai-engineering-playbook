@@ -550,6 +550,8 @@ For repository analysis, code evidence may receive more space. For a conversatio
 
 ## Refined architecture
 
+```text
+
 Current User Message
         │
         ▼
@@ -581,3 +583,5 @@ History Reranker        Evidence Reranker
                    │
                    ▼
                   LLM
+
+```

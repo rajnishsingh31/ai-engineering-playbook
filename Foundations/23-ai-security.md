@@ -20,7 +20,8 @@ Model Abuse
 
 This is why AI security has become its own discipline.
 
-##The Enterprise AI Stack
+## The Enterprise AI Stack
+```text
 
                 User
                   │
@@ -36,6 +37,7 @@ This is why AI security has become its own discipline.
       ▼                       ▼
  Vector DB            Email, SQL, GitHub,
  Documents            Jira, Slack, APIs
+```
 
 Every box is an attack surface.
 
@@ -132,6 +134,7 @@ Show me Microsoft's ARR.
 
 If your retrieval layer is not tenant-aware:
 
+```text
 Vector Search
      ↓
 Wrong document retrieved
@@ -139,6 +142,7 @@ Wrong document retrieved
 LLM answers correctly...
      ↓
 Massive security incident
+```
 
 The LLM is not the problem.
 
@@ -194,7 +198,7 @@ Follow the Principle of Least Privilege.
 Never rely on one defense.
 
 Use multiple layers.
-
+```text
 User
    │
 Authentication
@@ -210,7 +214,7 @@ Tool Validation
 Execution
    │
 Audit Logs
-
+```
 If one layer fails, another should stop the attack.
 
 ### Trust Boundaries
@@ -241,12 +245,12 @@ GitHub Issues
 The planner should know where information came from.
 
 Example:
-
+```text
 {
   "source": "customer_uploaded_pdf",
   "trust_level": "untrusted"
 }
-
+```
 ### Tool Approval
 
 Low-risk actions:
@@ -296,11 +300,11 @@ Otherwise attackers can permanently change agent behavior.
 Never trust the model's output directly.
 
 Suppose the model returns:
-
+```text
 {
   "amount": "1000000000"
 }
-
+```
 Before transferring money:
 
 Validate:
@@ -316,6 +320,7 @@ LLMs generate proposals.
 Applications make decisions.
 
 ## Secure Architecture
+```text
             User
               │
               ▼
@@ -340,7 +345,7 @@ Applications make decisions.
               │
               ▼
         External Systems
-
+```
 Notice:
 
 The policy engine is outside the LLM.

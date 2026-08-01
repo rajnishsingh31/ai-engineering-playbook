@@ -835,6 +835,8 @@ legal holds.
 
 A robust AI workflow should look like this:
 
+```text
+
 User Request
      │
      ▼
@@ -854,6 +856,7 @@ Workflow Engine
               │
               ▼
              LLM
+```
 
 ### The LLM participates in selected steps, such as:
 
@@ -872,6 +875,9 @@ completion,
 cancellation,
 resumability.
 Example: Financial Document Workflow
+
+```text
+
 Workflow Created
        ↓
 Documents Registered
@@ -897,6 +903,8 @@ Awaiting User Approval
 Email Sent
        ↓
 Workflow Completed
+
+```
 
 **At every stage, authoritative state is stored outside the LLM.**
 
@@ -1002,6 +1010,9 @@ That last point is particularly important:
 An LLM invocation should be modeled as a task with inputs, output schema, timeout, status, model metadata, and retry policy—not as a magical special operation.
 
 Recommended architecture
+
+```text
+
                          User Request
                               │
                               ▼
@@ -1028,6 +1039,8 @@ Recommended architecture
                               │
                               ▼
                      Approval Service
+
+```
 
 ### 1. Central orchestrator
 

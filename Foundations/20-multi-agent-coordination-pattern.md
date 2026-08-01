@@ -28,6 +28,8 @@ By the end of this chapter, you'll be able to look at CrewAI, LangGraph, AutoGen
 
 This is the easiest pattern to understand.
 
+```text
+
               Manager Agent
                     │
       ┌─────────────┼─────────────┐
@@ -37,6 +39,8 @@ This is the easiest pattern to understand.
       └─────────────┼─────────────┘
                     ▼
               Manager decides
+
+```
 
 **The workers do not talk to each other.
 
@@ -149,6 +153,8 @@ Large context may accumulate at manager.
 
 Looks similar but is actually different.
 
+```text
+
                   Director Agent
                         │
               ┌─────────┴─────────┐
@@ -159,7 +165,9 @@ Looks similar but is actually different.
          ▼         ▼        ▼           ▼
      Revenue   Expenses  Build     Test Agents
 
-Notice:
+```
+
+**Notice:**
 
 Managers themselves become workers of another manager.
 
@@ -258,6 +266,8 @@ Nobody talks directly.
 
 Instead, everyone shares a common workspace.
 
+```text
+
           Shared Blackboard
 
         ARR = $10B
@@ -272,6 +282,8 @@ Instead, everyone shares a common workspace.
      ▲        ▲         ▲
      │        │         │
 Research  Finance   Writer
+
+```
 
 Research Agent writes:
 

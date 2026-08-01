@@ -543,6 +543,8 @@ This is how you safely integrate an LLM into conventional distributed systems.
 
 ## Where Structured Outputs Fit
 
+```text
+
 User Question
       │
 Conversation and Memory
@@ -564,6 +566,8 @@ Schema Validation
 Business Validation
       │
 UI / Database / Next Workflow Step
+
+```
 
 ## Structured outputs may appear multiple times:
 

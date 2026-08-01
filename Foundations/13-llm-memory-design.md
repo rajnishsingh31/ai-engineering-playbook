@@ -28,11 +28,14 @@ has no persistent memory between API calls.
 
 Instead:
 
+```text
+
 Application
         │
 Memory Store
         │
        LLM
+```
 
 **The application decides what information to retrieve and include.**
 
@@ -792,6 +795,8 @@ that memory might be unnecessary.
 
 ## Final architecture
 
+```text
+
 Conversation
      │
      ▼
@@ -821,6 +826,8 @@ Session Working  User Memory  External Knowledge
                     │
                     ▼
                 Memory Store
+
+```
 
 The core principle is:
 

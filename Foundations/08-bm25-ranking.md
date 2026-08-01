@@ -707,6 +707,8 @@ Strong enterprise retrieval
 
 Either use single DB that supports both keyword search and vector or use same canonical chunks and stableIDs.
 
+```text
+
 One source document
         ↓
 One chunking pipeline
@@ -721,6 +723,8 @@ BM25 index   Vector index
 Merge and deduplicate by chunk ID
         ↓
 Rerank candidate text
+
+```
 
 So the direct answer is:
 

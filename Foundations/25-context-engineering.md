@@ -3,7 +3,7 @@
 ## The Evolution
 
 Think of the evolution like this:
-
+```text
 Prompt Engineering
         ↓
 RAG
@@ -13,7 +13,7 @@ Memory
 Agents
         ↓
 Context Engineering
-
+```
 Early AI applications asked:
 
 "How should I write my prompt?"
@@ -33,7 +33,7 @@ You are a helpful assistant...
 It isn't.
 
 This is.
-
+```text
 System Prompt
 +
 Retrieved Documents
@@ -47,7 +47,7 @@ Tool Results
 Current Workflow State
 +
 User Question
-
+```
 That entire package is called Context.
 
 The prompt is only one small piece.
@@ -75,23 +75,24 @@ So the quality of the answer depends on the quality of the context, not just the
 Context = Working Memory
 
 Remember when we studied memory?
-
-Long-term Memory
+```text
+ Long-term Memory
         │
         ▼
-Retriever
+    Retriever
         ▼
-Working Memory
+  Working Memory
         ▼
-LLM
+       LLM
+```
 
-## Context Engineering is essentially building the LLM's working memory for one request.
+**Context Engineering **is essentially building the LLM's working memory for one request.
 
-What Goes Into Context?
+#### What Goes Into Context?
 
 A production system may assemble context from many sources.
-
-###               Context Builder
+```text
+               Context Builder
                       │
       ┌───────────────┼────────────────┐
       ▼               ▼                ▼
@@ -102,7 +103,7 @@ Retrieval        Workflow State     Tool Results
           Prompt Assembly
                  ▼
                 LLM
-
+```
 Notice:
 
 The Context Builder becomes one of the most important components.
@@ -160,7 +161,7 @@ more opportunities for prompt injection.
 ### Context Sources
 
 Think in layers.
-
+```text
 User Request
         │
         ▼
@@ -177,7 +178,7 @@ Conversation
         │
         ▼
   Workflow State
-
+```
 Not every request needs every layer.
 
 Example 1 — Financial Comparison
@@ -187,7 +188,7 @@ User:
 Which company has highest ARR growth?
 
 Need:
-
+```text
 ✓ Annual reports
 
 ✓ ARR metrics
@@ -199,13 +200,13 @@ Need:
 ✗ Customer emails
 
 ✗ Meeting notes
-
+```
 The Context Builder should include only relevant information.
 
 Example 2 — Incident Investigation
 
 Need:
-
+```text
 ✓ Deployment history
 
 ✓ Logs
@@ -219,7 +220,7 @@ Need:
 ✗ HR policy
 
 ✗ Financial reports
-
+```
 Again, selective context.
 
 ### Context Prioritization
@@ -265,7 +266,7 @@ Should you pass all 25?
 Usually not.
 
 Instead:
-
+```text
 Meeting
 
 ↓
@@ -279,7 +280,7 @@ Summarizer
 ↓
 
 LLM
-
+```
 Compression reduces:
 
 cost,
@@ -339,23 +340,14 @@ Freshness becomes a ranking signal.
 
 Not all context is equally trustworthy.
 
-Official API
-        High
-
-Approved Architecture
-        High
-
-Wiki
-        Medium
-
-Slack
-        Medium
-
-Customer Upload
-        Low
-
-Internet
-        Lowest
+| Source                | Trust Level |
+| --------------------- | ----------- |
+| Official API          | High        |
+| Approved Architecture | High        |
+| Wiki                  | Medium      |
+| Slack                 | Medium      |
+| Customer Upload       | Low         |
+| Internet              | Lowest      |
 
 The model should know the trust level.
 
@@ -404,7 +396,7 @@ Tool returns:
 Revenue = 100M
 
 Now the Context Builder updates:
-
+```text
 Context v1
 
 ↓
@@ -414,7 +406,7 @@ Tool Result
 ↓
 
 Context v2
-
+```
 The context evolves throughout the workflow.
 
 ### Context Versioning
@@ -498,15 +490,15 @@ I want to connect this with everything we've built.
 Remember our ContextBuilder inside AgentRuntime?
 
 It started as:
-
+```text
 State
 +
 Memory
 +
 Retriever
-
+```
 After today's lesson, it becomes much richer:
-
+```text
 Conversation
 +
 Workflow State
@@ -533,8 +525,8 @@ Context Builder
         ↓
 Optimized Context
         ↓
-LLM
-
+       LLM
+```
 Notice something interesting:
 
 The Context Builder has quietly become one of the most important components in the entire architecture—almost as important as the Planner itself.

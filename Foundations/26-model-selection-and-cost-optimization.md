@@ -27,11 +27,11 @@ Generate Report
 ```
 
 Many beginners do:
-
+```text
 Everything
       ↓
 GPT-5.5
-
+```
 It works.
 
 It is also expensive.
@@ -49,7 +49,7 @@ AI should be the same.
 AI Pipeline
 
 Suppose:
-
+```text
 Question
      ↓
 Classify
@@ -61,7 +61,7 @@ Extract
 Compare
      ↓
 Generate
-
+```
 Do these require the same intelligence?
 
 No.
@@ -70,20 +70,13 @@ AI is a Pipeline of Different Cognitive Tasks
 
 Think of different "thinking levels":
 
-Level 1
-Classification
-
-Level 2
-Extraction
-
-Level 3
-Summarization
-
-Level 4
-Reasoning
-
-Level 5
-Planning
+| Level   | Capability     | Example                                                           |
+| ------- | -------------- | ----------------------------------------------------------------- |
+| Level 1 | Classification | Labeling a request or routing it to the right workflow            |
+| Level 2 | Extraction     | Pulling structured fields from text or documents                  |
+| Level 3 | Summarization  | Condensing long content into a short briefing                     |
+| Level 4 | Reasoning      | Comparing options, identifying tradeoffs, and drawing conclusions |
+| Level 5 | Planning       | Breaking a task into steps and coordinating multi-step execution  |
 
 Not every task needs Level 5.
 
@@ -316,7 +309,7 @@ No reason to regenerate the same explanation 100 times.
 Fallback Strategy
 
 Suppose GPT is unavailable.
-
+```text
 Application
       │
       ▼
@@ -326,7 +319,7 @@ GPT fails
       │
       ▼
 Claude
-
+```
 The application continues working.
 
 ## Production systems should plan for provider failures.
@@ -375,7 +368,7 @@ There is rarely one universally correct answer.
 The AI Platform View
 
 ## An enterprise platform might look like:
-
+```text
                 Applications
                       │
                       ▼
@@ -394,7 +387,7 @@ The AI Platform View
  ┌────┼────┬────┐
  ▼    ▼    ▼    ▼
 GPT Claude Gemini Local
-
+```
 Notice something:
 
 The model is just one service in the architecture.
@@ -447,7 +440,7 @@ AI Architect Insight
 Here's something that took many companies a while to realize:
 
 Early AI systems were model-centric.
-
+```text
 Best Model
      ↓
 Everything else
@@ -465,5 +458,5 @@ Observability
 Routing
 +
 Models
-
+```
 The model is one component of a larger engineering system.

@@ -38,19 +38,23 @@ The Prompt Builder
 
 Remember our pipeline:
 
+```text
+
 User Question
       │
 Query Transformation
       │
-Retrieval
+  Retrieval
       │
-RRF
+     RRF
       │
-Reranker
+  Reranker
       │
 Prompt Builder
       │
-LLM
+     LLM
+
+```
 
 We've arrived here.
 
@@ -453,6 +457,8 @@ It would not dump the entire repository.
 
 ## The End-to-End Picture
 
+```text
+
  User Question
                            │
                     Query Classifier
@@ -475,6 +481,8 @@ It would not dump the entire repository.
                                          │
                                          ▼
                                          LLM
+
+```
 
 ##  Retriever vs Reranker vs Prompt Builder
 

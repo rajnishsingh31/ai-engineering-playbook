@@ -488,6 +488,8 @@ Updated Architecture
 
 ## Our production pipeline now looks like this:
 
+```text
+
                    OFFLINE
 
 Document
@@ -528,6 +530,8 @@ Prompt Builder
      │
      ▼
 LLM
+
+```
 
 Notice where the reranker sits:
 

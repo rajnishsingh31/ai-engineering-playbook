@@ -327,6 +327,8 @@ Very useful in enterprise troubleshooting.
 
 Production systems rarely use just one.
 
+```text
+
 Example:
 
 User Question
@@ -351,6 +353,8 @@ RRF
         │
         ▼
 Reranker
+
+```
 
 ### But isn't this slower?
 
@@ -390,6 +394,8 @@ Remember our router?
 
 It becomes smarter.
 
+```text
+
                      User Query
                           │
                   Query Classifier
@@ -402,7 +408,9 @@ Identifier?                           Natural Language?
 Direct Lookup                  Query Transformation
         │                                   │
         ▼                                   ▼
-Retrieve                        Retrieve
+    Retrieve                            Retrieve
+
+```
 
 Not every query deserves transformation.
 
@@ -482,6 +490,8 @@ This is recognizably similar to the architecture behind many state-of-the-art en
 
 ## Query Transformation - Decision Tree
 
+```text
+
                    User Query
                        │
                Query Classifier
@@ -500,3 +510,5 @@ This is recognizably similar to the architecture behind many state-of-the-art en
                  RRF + Reranker
                        │
                       LLM
+
+```
