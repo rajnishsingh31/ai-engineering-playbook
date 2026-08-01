@@ -72,6 +72,7 @@ Goal:
 
 Don't miss relevant documents.
 
+```text
 Question
       │
       ▼
@@ -79,6 +80,7 @@ Vector Search
       │
       ▼
 Top 50 Chunks
+```
 
 Notice:
 
@@ -94,10 +96,11 @@ Remember:
 
 Recall = Don't miss useful information.
 
-# Stage 2 — Reranking
+## Stage 2 — Reranking
 
 Now we slow down a little.
 
+```text
 Top 50
      │
      ▼
@@ -105,6 +108,7 @@ Reranker
      │
      ▼
 Top 5
+```
 
 The reranker carefully compares:
 

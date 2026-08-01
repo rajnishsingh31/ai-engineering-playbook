@@ -14,6 +14,7 @@ The Biggest Mistake
 
 Imagine your application:
 
+```text
 Upload Financial Reports
         ↓
 Extract Tables
@@ -23,6 +24,7 @@ Summarize
 Compare Companies
         ↓
 Generate Report
+```
 
 Many beginners do:
 

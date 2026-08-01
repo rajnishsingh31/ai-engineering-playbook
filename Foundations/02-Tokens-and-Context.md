@@ -1,5 +1,11 @@
 # Chapter 2 - Tokens and Context
 
+## Table of Contents
+
+- [What is a Token?](#what-is-a-token)
+- [Context Window](#context-window)
+- [Architect Perspective](#architect-perspective)
+
 Let's Start with a Simple Question
 
 Imagine I ask you:

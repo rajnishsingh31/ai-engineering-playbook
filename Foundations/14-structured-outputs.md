@@ -319,6 +319,8 @@ But it is not a valid employee count.
 Your application still needs domain rules.
 
 ### The Validation Pipeline
+
+```text
 LLM
  │
  ▼
@@ -333,6 +335,7 @@ Business Validation
  │
  ▼
 Trusted Application Object
+```
 
 Do not let an LLM response directly update databases or invoke sensitive tools without validation.
 

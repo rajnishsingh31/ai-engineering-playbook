@@ -14,7 +14,7 @@ Workflow orchestration
 
 The important word is:
 
-# Decisions
+## Decisions
 
 A normal application follows a path designed in advance.
 
@@ -93,6 +93,7 @@ This loop is the foundation of agentic behavior.
 
 ### The Agent Loop
 
+```text
                    ┌────────────────────┐
                    │        Goal        │
                    └─────────┬──────────┘
@@ -118,6 +119,7 @@ This loop is the foundation of agentic behavior.
                  ┌───────────┴───────────┐
                  ▼                       ▼
             Goal complete           Continue loop
+```
 
 The agent is not just the LLM.
 

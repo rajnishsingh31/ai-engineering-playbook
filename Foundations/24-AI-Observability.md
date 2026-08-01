@@ -37,6 +37,7 @@ This is AI observability.
 
 ## The AI Pipeline
 
+```text
 User Question
       │
       ▼
@@ -56,6 +57,7 @@ Tool Calls
       │
       ▼
 Final Answer
+```
 
 **Every step should be observable.
 **

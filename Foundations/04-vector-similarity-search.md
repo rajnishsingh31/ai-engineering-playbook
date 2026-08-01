@@ -1,5 +1,24 @@
 # The vector database needs a mathematical way to measure that similarity.
 
+## Table of Contents
+
+- [Euclidean distance](#euclidean-distance)
+- [Cosine similarity](#cosine-similarity)
+- [Dot product](#dot-product)
+- [Normalized Vectors](#normalized-vectors)
+- [A concrete example:](#a-concrete-example)
+- [Similarity Does Not Mean Correctness](#similarity-does-not-mean-correctness)
+- [Metadata Filtering](#metadata-filtering)
+- [Top-K Retrieval](#top-k-retrieval)
+- [Small K](#small-k)
+- [Large K](#large-k)
+- [Similarity Threshold](#similarity-threshold)
+- [Exact Search vs Approximate Search](#exact-search-vs-approximate-search)
+- [ANN means:](#ann-means)
+- [Retrieval pipeline so far](#retrieval-pipeline-so-far)
+- [Engineer Perspective](#engineer-perspective)
+- [Architect Perspective](#architect-perspective)
+
 The three common approaches are:
 
 ## Euclidean distance
@@ -78,7 +97,7 @@ Before normalization: [10, 20]  After normalization: [0.447, 0.894]. The directi
 
 Why do this? Because it makes comparisons more consistent and allows efficient dot-product search while preserving cosine-style similarity.
 
-## A concetre example:
+## A concrete example:
 
 Suppose the user asks:
 
@@ -178,7 +197,7 @@ Then semantic search occurs only over acceptable candidates.
 
 This is where vector search becomes an enterprise retrieval system rather than a demo.
 
-# Top-K Retrieval
+## Top-K Retrieval
 
 A vector search usually asks for the top K results.
 
@@ -270,7 +289,7 @@ Comparing the query against every vector can become expensive and slow.
 
 Instead, vector databases commonly use **Approximate Nearest Neighbor**, or ANN, search.
 
-# ANN means:
+## ANN means:
 
 Find very likely nearest vectors without comparing against every vector.
 
@@ -301,9 +320,11 @@ Do not worry about the name yet.
 
 Think of it as a network of vectors connected to nearby vectors.
 
+```text
 A —— B —— C
 |    |     |
 D —— E —— F
+```
 
 When searching, the database navigates through the graph instead of scanning every vector.
 
@@ -318,7 +339,7 @@ slower and more expensive indexing.
 
 We will cover index trade-offs in the vector database chapter.
 
-# Retrieval pipeline so far
+## Retrieval pipeline so far
 
 User Question
       │
@@ -353,7 +374,7 @@ Prompt Builder
 Grounded Answer + Citations
 
 
-# Important Distinction
+## Important Distinction
 
 Keep these responsibilities separate:
 

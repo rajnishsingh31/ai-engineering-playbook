@@ -1,9 +1,10 @@
-## Hybrid Search
+# Hybrid Search
 
 Hybrid search combines both signals.
 
 Conceptually:
 
+```text
 Question
       │
       ├─────────────► Keyword Search
@@ -18,6 +19,7 @@ Question
                 │
                 ▼
               Top K
+```
 
 Notice:
 
@@ -214,31 +216,21 @@ Hybrid search doesn't replace metadata filtering.
 
 ## Pipeline:
 
+```text
 Authentication
-
 ↓
-
 Metadata Filters
-
 ↓
-
 Keyword Search
-
 +
-
 Vector Search
-
 ↓
-
 Merge
-
 ↓
-
 Rerank
-
 ↓
-
 LLM
+```
 
 Suppose a document belongs to:
 

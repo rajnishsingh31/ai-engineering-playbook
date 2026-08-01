@@ -1,6 +1,17 @@
 
 # Chunking: The Art of Preparing Knowledge for AI
 
+## Table of Contents
+
+- [Architect's Rule #1: A great embedding model cannot compensate for poor chunking.](#architects-rule-1-a-great-embedding-model-cannot-compensate-for-poor-chunking)
+- [what is chunk?](#what-is-chunk)
+- [Chunking pipeline](#chunking-pipeline)
+- [Chunk Size Trade-offs](#chunk-size-trade-offs)
+- [Metadata Matters](#metadata-matters)
+- [Architect Perspective](#architect-perspective)
+- [Engineer Perspective](#engineer-perspective)
+- [Architecture Update](#architecture-update)
+
 ## Architect's Rule #1: A great embedding model cannot compensate for poor chunking.
 
 I've seen production systems where teams spent weeks comparing embedding models, only to discover that the real issue was their chunking strategy.
@@ -31,25 +42,19 @@ No context.
 
 Impossible for the LLM to understand properly.
 
-# Chunking pipeline
+## Chunking pipeline
 
+```text
 PDF
-
 ↓
-
 Extract Text
-
 ↓
-
 Split into Chunks
-
 ↓
-
 Generate Embeddings
-
 ↓
-
 Store in Vector DB
+```
 
 Notice:
 
@@ -57,7 +62,7 @@ The embedding model never sees the entire document.
 
 It sees one chunk at a time.
 
-# Chunk Size Trade-offs
+## Chunk Size Trade-offs
 
 This is where architects earn their salary.
 
@@ -253,7 +258,7 @@ filtering,
 debugging,
 ranking.
 
-# Architect Perspective
+## Architect Perspective
 
 When designing a RAG system, ask:
 
@@ -267,7 +272,7 @@ How will we evaluate chunk quality?
 
 These questions often have a larger impact than switching between embedding models.
 
-# Engineer Perspective
+## Engineer Perspective
 
 When implementing chunking, you'll decide:
 
@@ -278,10 +283,10 @@ Metadata to store
 Handling of tables, lists, code, images, and headings
 Re-chunking strategy when documents change
 
-# Architecture Update
+## Architecture Update
 
+```text
 OFFLINE INDEXING
-
 Document
     │
     ▼
@@ -295,6 +300,7 @@ Embedding Model
     │
     ▼
 Vector DB
+```
 
 ## Libraries and services for chunking
 

@@ -1,5 +1,11 @@
 # Chapter 3 — Embeddings
 
+## Table of Contents
+
+- [Traditional Search](#traditional-search)
+- [Embedding](#embedding)
+- [Vector DB](#vector-db)
+
 This is the concept that makes RAG, semantic search, vector databases, recommendation engines, and modern AI search possible.
 
 Once you understand embeddings, you'll finally understand why you asked me about LanceDB a few days ago.
@@ -326,6 +332,7 @@ How can I reset my password?
 
 The system works like this:
 
+```text
 User Question
       │
       ▼
@@ -347,6 +354,7 @@ LLM
       │
       ▼
 Final Answer
+```
 
 Notice something.
 

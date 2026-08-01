@@ -8,17 +8,19 @@ How do I renew my driver signing certificate?
 
 BM25 returns:
 
-Rank	Document	BM25 Score
-1	A	18.2
-2	B	15.6
-3	C	12.4
+| Rank | Document | BM25 Score |
+| ---- | -------- | ---------- |
+| 1    | A        | 18.2       |
+| 2    | B        | 15.6       |
+| 3    | C        | 12.4       |
 
 Vector search returns:
 
-Rank	Document	Cosine Similarity
-1	B	0.94
-2	D	0.91
-3	A	0.89
+| Rank | Document | Cosine Similarity |
+| ---- | -------- | ----------------- |
+| 1    | B        | 0.94              |
+| 2    | D        | 0.91              |
+| 3    | A        | 0.89              |
 
 Now we have a problem.
 
@@ -119,10 +121,11 @@ The intuition
 
 Suppose we assign points like this:
 
-Rank	Points
-1	100
-2	50
-3	33
+| Rank | Points |
+| ---- | ------ |
+| 1    | 100    |
+| 2    | 50     |
+| 3    | 33     |
 
 This isn't the real formula.
 
@@ -132,25 +135,28 @@ Now:
 
 BM25:
 
-Doc	Points
-A	100
-B	50
-C	33
+| Doc | Points |
+| --- | ------ |
+| A   | 100    |
+| B   | 50     |
+| C   | 33     |
 
 Vector:
 
-Doc	Points
-B	100
-D	50
-A	33
+| Doc | Points |
+| --- | ------ |
+| B   | 100    |
+| D   | 50     |
+| A   | 33     |
 
 Total:
 
-Doc	Total
-A	133
-B	150
-C	33
-D	50
+| Doc | Total |
+| --- | ----- |
+| A   | 133   |
+| B   | 150   |
+| C   | 33    |
+| D   | 50    |
 
 Result:
 
@@ -245,11 +251,12 @@ compresses the differences.
 
 Approximate values:
 
-Rank	Contribution
-1	1/61
-2	1/62
-5	1/65
-10	1/70
+| Rank | Contribution |
+| ---- | ------------ |
+| 1    | 1/61         |
+| 2    | 1/62         |
+| 5    | 1/65         |
+| 10   | 1/70         |
 
 Notice:
 
@@ -373,27 +380,28 @@ A document doesn't need to appear in every list.
 Appearing in multiple lists simply increases confidence.
 
 A production pipeline
-               User Query
-                    │
-        ┌───────────┴───────────┐
-        ▼                       ▼
-     BM25                   Vector Search
-        │                       │
-   Top 50 docs             Top 50 docs
-        └───────────┬───────────┘
-                    ▼
-              Reciprocal Rank Fusion
-                    │
-             Top 30 merged docs
-                    │
-                    ▼
-                Reranker
-                    │
-               Top 5 docs
-                    │
-                    ▼
-                    LLM
 
+```text
+User Query
+   │
+   ├──────────────┬──────────────┐
+   ▼              ▼              ▼
+ BM25         Vector Search
+ Top 50 docs   Top 50 docs
+   └──────────────┬──────────────┘
+                  ▼
+      Reciprocal Rank Fusion
+                  │
+          Top 30 merged docs
+                  │
+                  ▼
+              Reranker
+                  │
+              Top 5 docs
+                  │
+                  ▼
+                  LLM
+```
 Notice the numbers.
 
 We don't usually rerank:
@@ -486,29 +494,31 @@ Mental model
 
 Keep this simple picture in your head:
 
+```text
 Retriever A
-      │
-      ▼
-   Ranked List
+    │
+    ▼
+Ranked List
 
 Retriever B
-      │
-      ▼
-   Ranked List
+    │
+    ▼
+Ranked List
 
 Retriever C
-      │
-      ▼
-   Ranked List
+    │
+    ▼
+Ranked List
 
         ▼
-      RRF
+        RRF
         ▼
 Merged Ranked List
         ▼
    Reranker
         ▼
-      LLM
+       LLM
+```
 
 Notice what RRF combines:
 

@@ -1,5 +1,6 @@
 # 13. LLM Memory Design
 
+```text
              Memory
 
       ┌─────────┼─────────┐
@@ -9,6 +10,7 @@
           ┌──────────────┼──────────────┐
           │              │              │
       Semantic      Episodic      Procedural
+```
 
 **Memory Is Not Inside the LLM**
 

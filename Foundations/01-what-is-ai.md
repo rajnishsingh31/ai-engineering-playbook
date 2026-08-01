@@ -1,3 +1,13 @@
+# Chapter 01 - What is AI
+
+## Table of Contents
+
+- [The Core Idea](#the-core-idea)
+- [AI vs Machine Learning vs Deep Learning](#ai-vs-machine-learning-vs-deep-learning)
+- [Deep Learning](#deep-learning)
+- [Engineer's Perspective](#engineers-perspective)
+- [Architect's Perspective](#architects-perspective)
+
 Before AI, we need to answer one question.
 
 What exactly are we building?
@@ -14,67 +24,45 @@ That's a subtle but important distinction.
 
 Think of an e-commerce website.
 
-                Amazon
+```text
+Amazon
 ──────────────────────────────────────
-
 Frontend
-
 ↓
-
 Backend APIs
-
 ↓
-
 Database
-
 ↓
-
 Payment Gateway
-
 ↓
-
 Recommendation Engine
+```
 
 The recommendation engine is just one component.
 
 Similarly, in an AI application:
 
-              Enterprise AI App
+```text
+Enterprise AI App
 ──────────────────────────────────────
-
 Web UI
-
 ↓
-
 Backend APIs
-
 ↓
-
 Authentication
-
 ↓
-
 Business Logic
-
 ↓
-
 LLM
-
 ↓
-
 Vector DB
-
 ↓
-
 Storage
-
 ↓
-
 Observability
-
 ↓
-
 Evaluation
+```
 
 The LLM is one component of a larger system.
 

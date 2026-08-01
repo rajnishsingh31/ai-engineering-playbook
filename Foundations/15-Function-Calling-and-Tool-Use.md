@@ -342,15 +342,12 @@ Weather
 
 Calendar
 
-Can execute together.
+These can execute together.
 
-Tool A
+- Tool A
+- Tool B
 
-||
-
-Tool B
-
-Parallel.
+These are parallel operations.
 
 Sometimes not.
 

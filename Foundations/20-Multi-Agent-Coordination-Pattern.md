@@ -311,6 +311,7 @@ This scales much better.
 
 Very common in cloud architectures.
 
+```text
 Research Finished
         │
         ▼
@@ -319,6 +320,7 @@ Research Finished
  ┌──────┴────────┐
  ▼               ▼
 Writer      Finance
+```
 
 Nobody knows who is listening.
 

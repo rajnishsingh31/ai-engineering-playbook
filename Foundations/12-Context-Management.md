@@ -93,6 +93,7 @@ This usually changes very little.
 
 A useful mental model is:
 
+```text
                  System
                     ▲
                  User
@@ -100,6 +101,7 @@ A useful mental model is:
             Conversation
                     ▲
          Retrieved Evidence
+```
 
 Each layer changes at a different rate.
 

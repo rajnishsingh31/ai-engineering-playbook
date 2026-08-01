@@ -4,12 +4,14 @@
 
 Example:
 
+```text
 Enterprise Assistant
         │
         ├── Finance Agent
         ├── Security Agent
         ├── Legal Agent
         └── Engineering Agent
+```
 
 A request might be:
 
@@ -65,6 +67,7 @@ This is an even stronger justification than expertise.
 
 Imagine a production incident system:
 
+```text
 Investigation Agent
         ↓
 Finds likely root cause
@@ -76,6 +79,7 @@ Proposes restart or rollback
 Approval Agent / Human
         ↓
 Execution Agent
+```
 
 The Investigation Agent has read-only access:
 

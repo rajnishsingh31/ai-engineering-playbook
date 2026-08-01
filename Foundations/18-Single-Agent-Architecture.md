@@ -48,14 +48,17 @@ Think Like an Operating System
 
 Instead of thinking:
 
+```text
 User
  ↓
 GPT
  ↓
 Answer
+```
 
 Think:
 
+```text
                 User Goal
                      │
                      ▼
@@ -73,6 +76,7 @@ Think:
       │
       ▼
  Workflow Engine
+```
 
 Notice something.
 
@@ -82,7 +86,7 @@ It's inside the runtime.
 
 That's how Microsoft, Google, Anthropic, OpenAI, etc. think.
 
-# The Agent Runtime
+## The Agent Runtime
 
 Imagine removing the LLM.
 
@@ -158,47 +162,29 @@ Notice that most of these are things we've already learned.
 
 Every agent repeatedly executes the same high-level loop.
 
+```text
 Goal
-
 ↓
-
 Understand current situation
-
 ↓
-
 Decide next action
-
 ↓
-
 Validate action
-
 ↓
-
 Execute
-
 ↓
-
 Observe
-
 ↓
-
 Evaluate
-
 ↓
-
 Update state
-
 ↓
-
 Stop?
-
 ↓
-
 No
-
 ↓
-
 Repeat
+```
 
 Every agent framework in the industry is implementing some variation of this loop.
 

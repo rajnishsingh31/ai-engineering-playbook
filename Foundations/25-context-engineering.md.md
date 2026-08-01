@@ -451,6 +451,7 @@ Architect's Mental Model
 
 This is the one diagram I want you to remember.
 
+```text
           Available Information
                   │
                   ▼
@@ -463,6 +464,7 @@ This is the one diagram I want you to remember.
           Assemble Context
                   ▼
                  LLM
+```
 
 The Context Builder is essentially an intelligent operating system for the LLM's working memory.
 

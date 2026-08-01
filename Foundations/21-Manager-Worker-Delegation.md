@@ -2,6 +2,7 @@
 
 The manager–worker pattern is usually the safest starting point for multi-agent systems because one component owns the overall goal.
 
+```text
                      User Goal
                          │
                          ▼
@@ -16,6 +17,7 @@ The manager–worker pattern is usually the safest starting point for multi-agen
                          │
                          ▼
                     Final Result
+```
 
 The manager does not necessarily perform every analysis itself. It decides:
 

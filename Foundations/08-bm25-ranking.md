@@ -115,6 +115,7 @@ BM25 prevents keyword stuffing from dominating results.
 
 Conceptually:
 
+```text
 Relevance
    │
    │        ─────────
@@ -123,6 +124,7 @@ Relevance
    │  /
    └──────────────────
        Term frequency
+```
 
 The score rises, but eventually levels off.
 
@@ -701,7 +703,7 @@ Reranker
 =
 Strong enterprise retrieval
 
-# Recommended mental model - Strategy to store chunks in search and vector DB
+## Recommended mental model - Strategy to store chunks in search and vector DB
 
 Either use single DB that supports both keyword search and vector or use same canonical chunks and stableIDs.
 
@@ -724,7 +726,7 @@ So the direct answer is:
 
 Use the same canonical chunks and stable IDs for both retrieval methods whenever practical. They may live in one unified index or separate databases, but both should map back to the same original chunk text and metadata.
 
-# BM25 relevace:
+## BM25 relevance:
 
 BM25 relevance
 =

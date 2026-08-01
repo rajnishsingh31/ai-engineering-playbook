@@ -18,11 +18,13 @@ Explain BM25.
 
 The application sends the question to the LLM and returns the response.
 
+```text
 Request
    ↓
 LLM
    ↓
 Response
+```
 
 Once the response is returned, the application does not need to preserve much operational information.
 
@@ -36,6 +38,7 @@ Compare three uploaded companies, calculate revenue growth, identify the healthi
 
 This requires several steps:
 
+```text
 Upload documents
       ↓
 Extract content
@@ -53,6 +56,7 @@ Generate report
 Request approval
       ↓
 Send email
+```
 
 Suppose the system fails after extracting two companies.
 
@@ -960,7 +964,7 @@ State transitions must be deterministic.
 
 External systems remain authoritative for their actions.
 
-# Excersie:
+## Exercise:
 
 Cover:
 

@@ -34,6 +34,7 @@ Change the query.
 
 Pipeline becomes:
 
+```text
 User Question
         │
         ▼
@@ -50,6 +51,7 @@ Reranker
         │
         ▼
 LLM
+```
 
 Notice:
 
@@ -154,6 +156,7 @@ Now retrieve using all of them.
 
 Pipeline:
 
+```text
 Original Question
         │
         ▼
@@ -171,6 +174,7 @@ Merge
         │
         ▼
 RRF
+```
 
 Notice...
 
