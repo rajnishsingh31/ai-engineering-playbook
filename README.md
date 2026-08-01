@@ -26,8 +26,10 @@ This repository is a practical playbook for building AI-powered applications wit
 - [13. LLM Memory Design](Foundations/13-llm-memory-design.md)
 - [14. Structured Outputs](Foundations/14-structured-outputs.md)
 - [15. Function Calling and Tool Use](Foundations/15-function-calling-and-tool-use.md)
+- [15.1 Tool Executer Design](Foundations/15.1-tool-executor-design.md)
 - [16. State Management](Foundations/16-state-management.md)
 - [17. Agent Fundamentals](Foundations/17-agent-fundamentals.md)
+- [17.1. Designing AgentRuntime](Foundations/17.1-agent-runtime-design.md)
 - [18. Single-Agent Architecture](Foundations/18-single-agent-architecture.md)
 - [19. Multi-Agent Introduction](Foundations/19-multi-agent-introduction.md)
 - [20. Multi-Agent Coordination Patterns](Foundations/20-multi-agent-coordination-pattern.md)
@@ -37,11 +39,11 @@ This repository is a practical playbook for building AI-powered applications wit
 - [24. AI Observability](Foundations/24-ai-observability.md)
 - [25. Context Engineering](Foundations/25-context-engineering.md)
 - [26. Model Selection and Cost Optimization](Foundations/26-model-selection-and-cost-optimization.md)
+- [26.1 Temperature and Hallucinations](Foundations/26.1-temperature-and-hallucinations.md)
 - [27. Model Context Protocol](Foundations/27-model-context-protocol.md)
 - [28. AI Frameworks](Foundations/28-ai-frameworks.md)
-- [29. Designing AgentRuntime](Foundations/29-agent-runtime-design.md)
-- [30. Temperature and Hallucinations](Foundations/30-temperature-and-hallucinations.md)
-- [31. Vector Database](Foundations/31-vector-database.md)
+
+
 
 ## Suggested reading order
 

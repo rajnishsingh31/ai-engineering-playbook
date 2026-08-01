@@ -2,22 +2,31 @@
 
 ## Table of Contents
 
-- [Euclidean distance](#euclidean-distance)
-- [Cosine similarity](#cosine-similarity)
-- [Dot product](#dot-product)
-- [Normalized Vectors](#normalized-vectors)
-- [A concrete example:](#a-concrete-example)
-- [Similarity Does Not Mean Correctness](#similarity-does-not-mean-correctness)
-- [Metadata Filtering](#metadata-filtering)
-- [Top-K Retrieval](#top-k-retrieval)
-- [Small K](#small-k)
-- [Large K](#large-k)
-- [Similarity Threshold](#similarity-threshold)
-- [Exact Search vs Approximate Search](#exact-search-vs-approximate-search)
-- [ANN means:](#ann-means)
-- [Retrieval pipeline so far](#retrieval-pipeline-so-far)
+- [The vector database needs a mathematical way to measure that similarity.](#the-vector-database-needs-a-mathematical-way-to-measure-that-similarity)
+  - [Table of Contents](#table-of-contents)
+  - [Euclidean distance](#euclidean-distance)
+  - [Cosine similarity](#cosine-similarity)
+  - [Dot product](#dot-product)
+- [dot product](#dot-product-1)
+  - [Normalized Vectors](#normalized-vectors)
+  - [A concrete example:](#a-concrete-example)
+  - [Similarity Does Not Mean Correctness](#similarity-does-not-mean-correctness)
+  - [Metadata Filtering](#metadata-filtering)
+  - [Top-K Retrieval](#top-k-retrieval)
+  - [Small K](#small-k)
+  - [Large K](#large-k)
+  - [Similarity Threshold](#similarity-threshold)
+  - [Exact Search vs Approximate Search](#exact-search-vs-approximate-search)
+  - [ANN means:](#ann-means)
+    - [Analogy: Finding a Restaurant](#analogy-finding-a-restaurant)
+    - [HNSW — A Preview](#hnsw--a-preview)
+  - [Retrieval pipeline so far](#retrieval-pipeline-so-far)
+  - [Important Distinction](#important-distinction)
+  - [Recall](#recall)
+    - [Recall versus precision](#recall-versus-precision)
 - [Engineer Perspective](#engineer-perspective)
 - [Architect Perspective](#architect-perspective)
+- [Popular Vector DB](#popular-vector-db)
 
 The three common approaches are:
 
@@ -492,3 +501,14 @@ What happens when retrieval returns no strong match?
 How much latency and recall loss are acceptable?
 Should the system use exact or approximate search?
 How will embedding model upgrades and reindexing be managed
+
+# Popular Vector DB
+
+| Database | Best For | Trade-offs |
+| --- | --- | --- |
+| LanceDB | Local development, embedded apps, analytics | Simple, lightweight, not a managed cloud service |
+| pgvector | Existing PostgreSQL systems | One database to operate, but not always the best fit for very large vector workloads |
+| Pinecone | Managed cloud vector search | Easy to use, but vendor-managed and potentially higher cost |
+| Qdrant | Open-source production deployments | Strong filtering and retrieval features |
+| Milvus | Very large-scale deployments | Powerful but operationally more complex |
+| Azure AI Search | Azure enterprise ecosystems | Integrates well with Azure services, combines keyword and vector search |
