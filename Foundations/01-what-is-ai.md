@@ -2,11 +2,14 @@
 
 ## Table of Contents
 
-- [The Core Idea](#the-core-idea)
-- [AI vs Machine Learning vs Deep Learning](#ai-vs-machine-learning-vs-deep-learning)
-- [Deep Learning](#deep-learning)
-- [Engineer's Perspective](#engineers-perspective)
-- [Architect's Perspective](#architects-perspective)
+- [Chapter 01 - What is AI](#chapter-01---what-is-ai)
+  - [Table of Contents](#table-of-contents)
+  - [The Core Idea](#the-core-idea)
+  - [AI vs Machine Learning vs Deep Learning](#ai-vs-machine-learning-vs-deep-learning)
+    - [AI](#ai)
+  - [Deep Learning](#deep-learning)
+  - [Engineer's Perspective](#engineers-perspective)
+  - [Architect's Perspective](#architects-perspective)
 
 Before AI, we need to answer one question.
 
@@ -197,6 +200,7 @@ LLMs work differently from humans internally, but this analogy is useful for und
 
 This hierarchy is worth memorizing conceptually.
 
+```text
 Artificial Intelligence
 │
 ├── Machine Learning
@@ -208,6 +212,8 @@ Artificial Intelligence
 │      │      ├── NLP
 │      │      │
 │      │      └── Large Language Models
+
+```
 
 ### AI
 

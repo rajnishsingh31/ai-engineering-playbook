@@ -263,6 +263,8 @@ Engineer Perspective
 
 ### Typical implementation:
 
+```text
+
 Question
       │
       ├────────────► BM25
@@ -278,6 +280,8 @@ Question
               ▼
              LLM
 
+```
+
 Notice the new term:
 
 ### BM25
@@ -291,6 +295,8 @@ We'll learn it shortly.
 Our RAG pipeline now becomes:
 
 ### OFFLINE
+
+```text
 
 Document
     │
@@ -306,8 +312,11 @@ Embedding
     ▼
 Vector DB
 
+```
 
 ### ONLINE
+
+```text
 
 User Question
       │
@@ -332,6 +341,7 @@ Metadata Filters
                  │
                  ▼
                 LLM
+```
 
 Notice that we now have two retrieval engines working together.
 
