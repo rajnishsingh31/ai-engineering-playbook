@@ -6,7 +6,6 @@
   - [Table of Contents](#table-of-contents)
   - [The Core Idea](#the-core-idea)
   - [AI vs Machine Learning vs Deep Learning](#ai-vs-machine-learning-vs-deep-learning)
-    - [AI](#ai)
   - [Deep Learning](#deep-learning)
   - [Engineer's Perspective](#engineers-perspective)
   - [Architect's Perspective](#architects-perspective)
@@ -215,7 +214,7 @@ Artificial Intelligence
 
 ```
 
-### AI
+**AI:**
 
 The broad field.
 
